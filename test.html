@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>外部CSS实现背景图模糊</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-container">
+        <div class="blur-background" id="blurBackground"></div>
+    </div>
+    <div class="overlay"></div>
+    
+    <div class="content">
+        <h1>外部CSS实现背景图模糊</h1>
+        <p>这个页面展示了如何使用外部CSS文件实现背景模糊效果。背景图片使用了您提供的URL，并通过CSS的filter属性实现模糊效果。</p>
+        
+        <div class="cards-container">
+            <div class="card">
+                <h3>CSS Filter</h3>
+                <p>使用CSS的filter: blur()属性可以轻松实现背景模糊效果，无需JavaScript。</p>
+            </div>
+            <div class="card">
+                <h3>外部CSS</h3>
+                <p>将样式放在外部CSS文件中，使代码结构更清晰，更易于维护。</p>
+            </div>
+            <div class="card">
+                <h3>响应式设计</h3>
+                <p>使用媒体查询确保模糊背景在不同设备上都能正常显示。</p>
+            </div>
+        </div>
+        
+        <div class="blur-control">
+            <label for="blurRange">调整模糊程度:</label>
+            <input type="range" id="blurRange" min="0" max="20" value="8" step="1">
+            <span id="blurValue">8px</span>
+        </div>
+        
+        <div class="footer">
+            <p>尝试拖动滑块调整背景模糊程度 | 外部CSS文件实现示例</p>
+        </div>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const blurRange = document.getElementById('blurRange');
+        const blurValue = document.getElementById('blurValue');
+        const blurBackground = document.getElementById('blurBackground');
+        
+        // 监听滑块变化
+        blurRange.addEventListener('input', function() {
+            const blurAmount = this.value + 'px';
+            blurBackground.style.filter = `blur(${blurAmount})`;
+            blurValue.textContent = blurAmount;
+        });
+    </script>
+</body>
+</html>
