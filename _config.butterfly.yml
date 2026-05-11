@@ -56,7 +56,7 @@ social:
 favicon: /img/favicon.png
 
 avatar:
-  img: /img/butterfly-icon.png
+  img: https://raw.githubusercontent.com/SSChen09/su.res/refs/heads/main/img/headimg.jpg
   effect: false
 
 # Disable all banner images
