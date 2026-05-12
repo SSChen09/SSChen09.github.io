@@ -56,7 +56,7 @@ social:
 favicon: /img/favicon.png
 
 avatar:
-  img: https://raw.githubusercontent.com/SSChen09/su.res/refs/heads/main/img/headimg.jpg
+  img:  https://cdn.jsdelivr.net/gh/SSChen09/su.res@main/img/headimg.jpg
   effect: false
 
 # Disable all banner images
@@ -93,7 +93,7 @@ footer_img: false
 # Website Background
 # Can set it to color, image URL or an array containing colors and/or image URLs
 # If an array is provided, a random background will be selected from the array on each load
-background: https://raw.githubusercontent.com/SSChen09/su.res/refs/heads/main/img/141244995_p0.jpg
+background: https://cdn.jsdelivr.net/gh/SSChen09/su.res@main/img/141244995_p0.jpg
 
 cover:
   # Disable the cover or not
