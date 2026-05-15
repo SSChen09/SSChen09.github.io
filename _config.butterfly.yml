@@ -18,6 +18,17 @@ nav:
   fixed: false
 
 menu:
+首页: / || fas fa-home
+时间轴: /archives/ || fas fa-archive
+标签: /tags/ || fas fa-tags
+分类: /categories/ || fas fa-folder-open
+清单||fa fa-heartbeat:
+音乐: /music/ || fas fa-music
+照片: /Gallery/ || fas fa-images
+电影: /movies/ || fas fa-video
+友链: /link/ || fas fa-link
+关于: /about/ || fas fa-heart
+
   # Home: / || fas fa-home
   # List||fas fa-list:
   #   Music: /music/ || fas fa-music
@@ -66,7 +77,7 @@ disable_top_img: false
 default_top_img:
 
 # The banner image of index page
-index_img:
+index_img: 
 
 # The banner image of archive page
 archive_img:
@@ -691,7 +702,7 @@ baidu_analytics:
 google_analytics:
 
 # https://www.cloudflare.com/zh-tw/web-analytics/
-cloudflare_analytics:
+cloudflare_analytics: 7de2ab68ccf14efc987b25609402d5c5
 
 # https://clarity.microsoft.com/
 microsoft_clarity:
