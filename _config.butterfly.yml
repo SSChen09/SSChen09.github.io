@@ -51,6 +51,8 @@ code_blocks:
 # Formal:
 #   icon: link || the description || color
 social:
+  fab fa-github: https://github.com/SSChen09 || Github || '#24292e'
+  fas fa-envelope: mailto:sansanchen09@gmail.com || Email || '#4a7dbe'
   # fab fa-github: https://github.com/xxxxx || Github || '#24292e'
   # fas fa-envelope: mailto:xxxxxx@gmail.com || Email || '#4a7dbe'
 
@@ -74,10 +76,10 @@ default_top_img:
 index_img: https://cdn.jsdelivr.net/gh/SSChen09/su.res@main/img/125754402_p0.jpg
 
 # The banner image of archive page
-archive_img:
+archive_img: https://cdn.jsdelivr.net/gh/SSChen09/su.res@main/img/125754402_p0.jpg
 
 # Note: tag page, not tags page
-tag_img:
+tag_img: https://cdn.jsdelivr.net/gh/SSChen09/su.res@main/img/125754402_p0.jpg
 
 # The banner image of tag page, you can set the banner image for each tag
 # Format:
@@ -85,7 +87,7 @@ tag_img:
 tag_per_img:
 
 # Note: category page, not categories page
-category_img:
+category_img: https://cdn.jsdelivr.net/gh/SSChen09/su.res@main/img/125754402_p0.jpg
 
 # The banner image of category page, you can set the banner image for each category
 # Format:
@@ -154,12 +156,12 @@ index_top_img_height:
 
 # The subtitle on homepage
 subtitle:
-  enable: false
+  enable: true
   # Typewriter Effect
   effect: true
   # Customize typed.js
   # https://github.com/mattboldt/typed.js/#customization
-  typed_option:
+  typed_option: 1
   # Source - Call the third-party service API (Chinese only)
   # It will show the source first, then show the content of sub
   # Choose: false/1/2/3
@@ -167,7 +169,7 @@ subtitle:
   # 1 - hitokoto.cn
   # 2 - https://api.aa1.cn/doc/yiyan.html
   # 3 - jinrishici.com
-  source: false
+  source: true
   # If you close the typewriter effect, the subtitle will only show the first line of sub
   sub:
 
@@ -293,7 +295,7 @@ aside:
     button:
       enable: true
       icon: fab fa-github
-      text: 关 注
+      text: Follow Me
       link: https://github.com/SSChen09
   card_announcement:
     enable: true
@@ -1082,7 +1084,7 @@ CDN:
 
   # Custom format
   # For example: https://cdn.staticfile.org/${cdnjs_name}/${version}/${min_cdnjs_file}
-  custom_format: '- 保持你所热爱的 -'
+  custom_format:
 
   option:
     # abcjs_basic_js:
