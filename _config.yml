@@ -5,7 +5,7 @@
 # Site
 title: 洛辰の博客
 subtitle: '苏苏苏洛辰qwq'
-description: '这是一个部署在GitHub Pages上的Hexo博客'
+description: '期待未来，却又害怕遗忘过去'
 keywords: 苏洛辰のblog
 author: Su.LuoChen
 language: zh-CN
@@ -102,3 +102,11 @@ theme: butterfly
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: ''
+
+# Search
+## https://github.com/wzpan/hexo-generator-search
+search:
+  path: search.xml
+  field: post
+  content: true
+  format: html

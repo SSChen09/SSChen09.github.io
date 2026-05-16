@@ -71,7 +71,7 @@ disable_top_img: false
 default_top_img:
 
 # The banner image of index page
-index_img: 
+index_img: https://cdn.jsdelivr.net/gh/SSChen09/su.res@main/img/125754402_p0.jpg
 
 # The banner image of archive page
 archive_img:
@@ -98,7 +98,7 @@ footer_img: false
 # Website Background
 # Can set it to color, image URL or an array containing colors and/or image URLs
 # If an array is provided, a random background will be selected from the array on each load
-background: https://cdn.jsdelivr.net/gh/SSChen09/su.res@main/img/141244995_p0.jpg
+background:
 
 cover:
   # Disable the cover or not
@@ -293,11 +293,11 @@ aside:
     button:
       enable: true
       icon: fab fa-github
-      text: Follow Me
+      text: 关 注
       link: https://github.com/SSChen09
   card_announcement:
     enable: true
-    content: This is my Blog
+    content: 这里是Su.LuoChenの博客
   card_recent_post:
     enable: true
     # If set 0 will show all
@@ -479,8 +479,8 @@ math:
 search:
   # Choose: algolia_search / local_search / docsearch
   # leave it empty if you don't need search
-  use:
-  placeholder:
+  use: local_search
+  placeholder: 应该有你想要的...
 
   # Algolia Search
   algolia_search:
@@ -1082,7 +1082,7 @@ CDN:
 
   # Custom format
   # For example: https://cdn.staticfile.org/${cdnjs_name}/${version}/${min_cdnjs_file}
-  custom_format:
+  custom_format: '- 保持你所热爱的 -'
 
   option:
     # abcjs_basic_js:
