@@ -23,38 +23,6 @@
 | [GitHub Pages](https://pages.github.com/) | 静态网站托管 |
 | [jsDelivr](https://www.jsdelivr.com/) | CDN 加速静态资源 |
 
-## 🚀 快速开始
-
-### 环境要求
-
-- [Node.js](https://nodejs.org/) >= 14
-- [Git](https://git-scm.com/)
-
-### 安装与运行
-
-```bash
-# 克隆仓库
-git clone https://github.com/SSChen09/SSChen09.github.io.git
-cd SSChen09.github.io
-
-# 安装依赖
-npm install
-
-# 本地预览
-npm run server
-```
-
-访问 `http://localhost:4000` 即可预览博客。
-
-### 常用命令
-
-```bash
-npm run server    # 启动本地服务器
-npm run build     # 生成静态文件
-npm run clean     # 清除缓存和生成的文件
-npm run deploy    # 部署到 GitHub Pages
-```
-
 ## 📁 项目结构
 
 ```
