@@ -37,32 +37,9 @@ SSChen09.github.io/
 └── package.json
 ```
 
-## 🔧 自定义配置
-
-博客的主要配置文件：
-
-- **`_config.yml`** — Hexo 核心配置（站点信息、URL、插件等）
-- **`_config.butterfly.yml`** — Butterfly 主题配置（导航、样式、社交链接等）
-
-### 站点信息
-
-```yaml
-title: 洛辰の博客
-subtitle: '苏苏苏洛辰qwq'
-description: '期待未来，却又害怕遗忘过去'
-author: Su.LuoChen
-url: https://sschen09.github.io
-```
-
 ## 📬 联系方式
 
 - 🐙 GitHub: [SSChen09](https://github.com/SSChen09)
 - 📧 Email: sansanchen09@gmail.com
-
-## 📄 License
-
-[MIT](LICENSE)
-
----
 
 <p align="center">Made with ❤️ by <a href="https://github.com/SSChen09">Su.LuoChen</a></p>
