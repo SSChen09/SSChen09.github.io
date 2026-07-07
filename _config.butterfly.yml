@@ -63,7 +63,7 @@ social:
 favicon: /img/favicon.png
 
 avatar:
-  img:  https://cdn.jsdelivr.net/gh/SSChen09/su.res@main/img/headimg.jpg
+  img:  /img/headimg.jpg
   effect: false
 
 # Disable all banner images
@@ -161,7 +161,7 @@ subtitle:
   effect: true
   # Customize typed.js
   # https://github.com/mattboldt/typed.js/#customization
-  typed_option: 1
+  typed_option: false
   # Source - Call the third-party service API (Chinese only)
   # It will show the source first, then show the content of sub
   # Choose: false/1/2/3
@@ -171,7 +171,9 @@ subtitle:
   # 3 - jinrishici.com
   source: true
   # If you close the typewriter effect, the subtitle will only show the first line of sub
-  sub:
+  sub: 
+    - 保持你所热爱的
+    - Never Forget It
 
 # Article layout on the homepage
 # 1: Cover on the left, info on the right
@@ -519,7 +521,7 @@ search:
 share:
   # Choose: sharejs / addtoany
   # Leave it empty if you don't need share
-  use: sharejs
+  use:
 
   # Share.js
   # https://github.com/overtrue/share.js
@@ -540,7 +542,7 @@ comments:
   # Leave it empty if you don't need comments
   # Choose: Disqus/Disqusjs/Livere/Gitalk/Valine/Waline/Utterances/Facebook Comments/Twikoo/Giscus/Remark42/Artalk
   # Format of two comments system : Disqus,Waline
-  use: Gitalk,Waline
+  use: Waline,Gitalk
   # Display the comment name next to the button
   text: true
   # Lazyload: The comment system will be load when comment element enters the browser's viewport.
