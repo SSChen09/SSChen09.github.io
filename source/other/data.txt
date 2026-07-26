@@ -1,3 +1,4 @@
 ﻿各个页面的头图,pixiv,125754402,125754402_p0.jpg
 头像,pixiv,95382718,95382718_p0.jpg
 格调,米塔,无,https://github.com/SSChen09/su.res/blob/main/img/GeDiao.png,GeDiao.png
+关于-头图,pixiv,136046620,136046620_p0.png

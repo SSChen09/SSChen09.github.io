@@ -2,6 +2,7 @@
 title: 关于
 date: 2026-05-15 19:02:04
 comments: false
+top_img: /img/136046620_p0.png
 ---
 # 关于**洛の间**
 在某年某月机缘巧合下了解到了[Github Pages](https://pages.github.com/)这个神奇的玩意，于是有了建站的想法

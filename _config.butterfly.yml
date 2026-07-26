@@ -19,6 +19,10 @@ nav:
 
 menu:
   首页: / || fas fa-home
+  页面|| fas fa-file-lines:
+    图源: /other/pic.html || fas fa-file-lines
+    工具: /other/tool.html || fas fa-   toolbox
+    友链: /other/link.html || fas fa-link
   归档: /archives/ || fas fa-archive
   标签: /tags/ || fas fa-tags
   关于: /about/ || fas fa-heart
@@ -289,7 +293,6 @@ aside:
   display:
     archive: true
     tag: true
-    category: true
   card_author:
     enable: true
     description:
@@ -360,7 +363,7 @@ aside:
     # Time difference between publish date and now
     # Formal: Month/Day/Year Time or Year/Month/Day Time
     # Leave it empty if you don't enable this feature
-    runtime_date:
+    runtime_date: 2026/05/10 11:11:45
 
 # --------------------------------------
 # Bottom right button
@@ -1014,12 +1017,12 @@ snackbar:
 
 # Instant.page
 # https://instant.page/
-instantpage: false
+instantpage: true
 
 # Lazyload
 # https://github.com/verlok/vanilla-lazyload
 lazyload:
-  enable: false
+  enable: true
   # Use browser's native lazyload instead of vanilla-lazyload
   native: false
   # Specify the field to use lazyload (site or post)
