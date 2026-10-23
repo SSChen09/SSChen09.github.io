@@ -1,4 +1,4 @@
 User-agent: *
 Disallow: /_astro/
 
-Sitemap: https://sschen09.github.io/sitemap-index.xml
+Sitemap: https://blog.sslc0721.xyz/sitemap-index.xml
