@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>4ASCEND · 精灵与魔族的连珠之战</title>
+<link rel="stylesheet" href="style.css">
+<style>
+/* ================= 启动加载器 =================
+ * 全部模块就绪前遮挡棋盘：网络慢时不会看到半残的界面被操作，
+ * 某个脚本加载失败时给出明确原因，而不是静默地缺功能。 */
+.boot{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
+  background:var(--bg);transition:opacity .45s ease,visibility .45s}
+.boot::before{content:"";position:absolute;inset:0;
+  background:radial-gradient(60% 45% at 50% 28%,var(--glow-top),transparent 70%)}
+.boot-done{opacity:0;visibility:hidden}
+.boot-card{position:relative;width:min(86vw,380px);text-align:center;font-family:var(--ui)}
+.boot-logo{font-family:var(--display);font-size:2rem;font-weight:700;letter-spacing:.06em;color:var(--ink)}
+.boot-logo i{display:block;font-style:normal;font-size:.62rem;letter-spacing:.42em;color:var(--muted);margin-bottom:.5rem}
+.boot-bar{margin:1.6rem auto .9rem;height:4px;border-radius:99px;background:rgba(255,255,255,.09);overflow:hidden}
+.boot-bar span{display:block;height:100%;width:0;border-radius:99px;
+  background:linear-gradient(90deg,var(--elf),var(--gold));transition:width .25s ease}
+.boot-status{margin:0;font-size:.8rem;color:var(--muted);letter-spacing:.05em;min-height:1.2em}
+.boot-error{margin-top:1.1rem}
+.boot-error p{margin:0 0 .8rem;font-size:.82rem;line-height:1.6;color:var(--demon)}
+.boot-error .chip{cursor:pointer}
+.boot-failed .boot-bar span{background:var(--demon)}
+.boot-noscript{display:none}
+noscript .boot-noscript{display:block}
+</style>
+</head>
+<body>
+<!-- 启动加载遮罩：由页面底部的 loader 控制显隐，全部模块就绪后移除 -->
+<div class="boot" id="boot">
+  <div class="boot-card">
+    <div class="boot-logo"><i>ELVES &nbsp;·&nbsp; DEMONS</i>4ASCEND</div>
+    <div class="boot-bar"><span id="boot-fill"></span></div>
+    <p class="boot-status" id="boot-status">正在加载游戏模块…</p>
+    <div class="boot-error" id="boot-error" hidden>
+      <p id="boot-error-msg"></p>
+      <button class="chip gold" id="boot-retry" type="button">重新加载</button>
+    </div>
+    <div class="boot-noscript">
+      <p style="margin:0;font-size:.82rem;color:var(--demon)">此游戏需要启用 JavaScript 才能运行。</p>
+    </div>
+  </div>
+</div>
+<div class="vignette"></div>
+
+<div class="stage">
+  <header class="topbar">
+    <div>
+      <div class="logo"><i>ELVES &nbsp;·&nbsp; DEMONS</i>4ASCEND</div>
+      <p class="tagline">连珠即攻击 · 五子棋战棋</p>
+    </div>
+    <nav class="controls">
+      <button class="chip" id="btn-mode">模式：挑战魔族</button>
+      <button class="chip" id="btn-set">设置</button>
+      <button class="chip" id="btn-record">对局记录</button>
+      <button class="chip" id="btn-rules">规则</button>
+      <button class="chip gold" id="btn-new">新对局</button>
+    </nav>
+  </header>
+
+  <main class="arena">
+    <aside class="panel elf" id="panel-1">
+      <div class="p-head">
+        <span class="crest">
+          <svg width="22" height="22" viewBox="0 0 48 48" fill="none" stroke="#bdf4e9" stroke-width="2.4" stroke-linecap="round">
+            <path d="M24 8v32"/><path d="M24 22c-6-2-10-7-11-13"/><path d="M24 28c6-2 10-7 11-13"/>
+          </svg>
+        </span>
+        <div><h2>精灵阵营</h2><p class="sub">ELVES · 执白</p></div>
+        <span class="badge">先手</span>
+      </div>
+      <div class="hp-row">
+        <span class="label">生命值</span>
+        <div class="hp"><div class="hp-fill"></div><span class="hp-num"></span></div>
+      </div>
+      <div class="stats">
+        <div><span class="label">盘面棋子</span><b class="stone-count">0</b></div>
+        <div><span class="label">魔力储备</span><b class="reserve"></b></div>
+      </div>
+      <p class="status"></p>
+    </aside>
+
+    <section class="board-area">
+      <div class="turnbar" id="turnbar"></div>
+      <p class="ai-info" id="ai-info"></p>
+      <div class="board-frame" id="frame">
+        <div class="board" id="board"><div class="floats" id="floats"></div></div>
+        <div class="again" id="again">点击任意处 或 按 空格 再来一局</div>
+      </div>
+
+      <div class="replaybar" id="replaybar">
+        <button class="rp-btn" id="rp-first">开局</button>
+        <button class="rp-btn" id="rp-prev">上一步</button>
+        <button class="rp-btn" id="rp-play">播放</button>
+        <button class="rp-btn" id="rp-next">下一步</button>
+        <button class="rp-btn" id="rp-last">终局</button>
+        <input type="range" id="rp-slider" min="0" max="0" value="0">
+        <select id="rp-speed">
+          <option value="0.5">0.5×</option>
+          <option value="1" selected>1×</option>
+          <option value="2">2×</option>
+          <option value="4">4×</option>
+        </select>
+        <span class="rp-label" id="rp-label">第 0 / 0 步</span>
+        <button class="chip gold" id="rp-exit">退出回放</button>
+      </div>
+
+      <p class="hint" id="hint"></p>
+    </section>
+
+    <aside class="panel demon" id="panel-2">
+      <div class="p-head">
+        <span class="crest">
+          <svg width="22" height="22" viewBox="0 0 48 48" fill="none" stroke="#ffc6cd" stroke-width="2.4" stroke-linecap="round">
+            <path d="M13 12c3 9 8 13 11 13s8-4 11-13"/><path d="M15 33c4 6 14 6 18 0"/><path d="M19 24h.01"/><path d="M29 24h.01"/>
+          </svg>
+        </span>
+        <div><h2>魔族阵营</h2><p class="sub">DEMONS · 执黑</p></div>
+        <span class="badge" id="badge-2">AI 操控</span>
+      </div>
+      <div class="hp-row">
+        <span class="label">生命值</span>
+        <div class="hp"><div class="hp-fill"></div><span class="hp-num"></span></div>
+      </div>
+      <div class="stats">
+        <div><span class="label">盘面棋子</span><b class="stone-count">0</b></div>
+        <div><span class="label">魔力储备</span><b class="reserve"></b></div>
+      </div>
+      <p class="status"></p>
+    </aside>
+  </main>
+
+  <section class="strip">
+    <div class="card">
+      <h3>战报</h3>
+      <ol id="log"></ol>
+    </div>
+    <div class="card">
+      <h3>棋盘图例</h3>
+      <div class="legend">
+        <div class="row"><span class="sw a"></span><span><b>魔力植物</b>　落在其上的棋子参与 ASCEND 时，抵消战力 +1。</span></div>
+        <div class="row"><span class="sw b"></span><span><b>高亮虚线</b>　此处落子即可发动 ASCEND，相关棋子同时发出金光。</span></div>
+        <div class="row"><span class="sw c"></span><span><b>残影</b>　对手 ASCEND 留下的棋位，落子可反击并夺取植物。</span></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- 对局记录抽屉 -->
+<aside class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h3>对局记录</h3>
+    <button class="chip" id="btn-drawer-close">关闭</button>
+  </div>
+  <div class="rec-meta" id="rec-meta"></div>
+  <div class="drawer-actions">
+    <button class="chip gold" id="btn-replay">回放本局</button>
+    <button class="chip" id="btn-export">导出 JSON</button>
+    <button class="chip" id="btn-copy">复制文本棋谱</button>
+    <button class="chip" id="btn-import">导入棋谱</button>
+  </div>
+  <ol class="steps" id="steps"></ol>
+  <div class="drawer-actions">
+    <button class="chip gold" id="btn-continue">从当前步继续对局</button>
+  </div>
+</aside>
+<input type="file" id="in-file" accept=".json,application/json" style="display:none">
+
+<!-- 设置 -->
+<div class="modal" id="setmodal">
+  <div class="sheet">
+    <h2>新对局设置</h2>
+    <div class="field">
+      <label>棋盘大小 <b id="lbl-size">9 × 9</b></label>
+      <input type="range" id="in-size" min="5" max="15" step="2" value="9">
+      <p class="tip">最小 5×5，最大 15×15。连珠数固定为 4 枚（4ASCEND 的核心规则）。</p>
+    </div>
+    <div class="field">
+      <label>初始生命值 <b id="lbl-hp">20 点</b></label>
+      <input type="range" id="in-hp" min="4" max="50" step="1" value="20">
+      <p class="tip">生命越低，战局越短促激烈；每枚 ASCEND 棋子造成 1 点伤害。</p>
+    </div>
+    <div class="field">
+      <label>魔力植物生成概率 <b id="lbl-plant">70%</b></label>
+      <input type="range" id="in-plant" min="0" max="100" step="5" value="70">
+      <p class="tip">每次 ASCEND 结算后进行两次生长判定，此为单次判定的基础概率；连续发动 ASCEND 会让土地贫瘠，概率按比例衰减。</p>
+    </div>
+    <div class="field">
+      <label>对战模式</label>
+      <div class="seg" id="seg-mode">
+        <button class="seg-btn" data-mode="ai">挑战魔族（AI）</button>
+        <button class="seg-btn" data-mode="pvp">双人对战</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>AI 难度</label>
+      <div class="seg" id="seg-ai">
+        <button class="seg-btn" data-ai="novice">新手</button>
+        <button class="seg-btn" data-ai="normal">熟练</button>
+        <button class="seg-btn" data-ai="expert">老练</button>
+        <button class="seg-btn" data-ai="master">噩梦</button>
+        <button class="seg-btn" data-ai="custom">自定义</button>
+      </div>
+      <p class="tip">仅在「挑战魔族」模式下生效。新手会漏防并偶尔走闲棋；熟练为完整的一步评分；老练与噩梦改用树搜索，分别思考约 0.26 秒与 0.9 秒。</p>
+      <div class="ai-custom" id="ai-custom">
+        <div class="field">
+          <label>思考时间 <b id="lbl-ai-budget">0.50 秒</b></label>
+          <input type="range" id="in-ai-budget" min="50" max="2000" step="50" value="500">
+          <p class="tip">0.12 秒以内改用一步评分（快但浅），超过则用树搜索。最长 2 秒，比噩梦更深。</p>
+        </div>
+        <div class="field">
+          <label>失误率 <b id="lbl-ai-blunder">8%</b></label>
+          <input type="range" id="in-ai-blunder" min="0" max="40" step="2" value="8">
+          <p class="tip">按此概率整步改走随机位置，模拟「看漏了」。对两种算法都生效。</p>
+        </div>
+        <p class="tip" id="ai-custom-sum"></p>
+      </div>
+    </div>
+    <div class="field">
+      <label>主题颜色</label>
+      <div class="seg" id="seg-theme">
+        <button class="seg-btn" data-theme="default">默认</button>
+        <button class="seg-btn" data-theme="forest">暗夜森林</button>
+        <button class="seg-btn" data-theme="ocean">海洋深蓝</button>
+        <button class="seg-btn" data-theme="crystal">紫晶魔法</button>
+        <button class="seg-btn" data-theme="lava">火焰熔岩</button>
+      </div>
+      <p class="tip">每套主题配有一段独立的程序化背景音乐（调式、和声、音色与节奏各不相同），切换主题即刻换曲。</p>
+    </div>
+    <div class="field">
+      <label>音效 <b id="lbl-sound">开</b></label>
+      <div class="seg" id="seg-sound">
+        <button class="seg-btn" data-sound="1">开</button>
+        <button class="seg-btn" data-sound="0">关</button>
+      </div>
+      <p class="tip">落子、ASCEND、伤害等游戏音效。</p>
+    </div>
+    <div class="field">
+      <label>音效音量 <b id="lbl-svol">85%</b></label>
+      <input type="range" id="in-svol" min="0" max="100" step="5" value="85">
+      <p class="tip">拖动时会试听落子音。调到 0 即静音，与上面的开关相互独立。</p>
+    </div>
+    <div class="field">
+      <label>背景音乐 <b id="lbl-music">开</b></label>
+      <div class="seg" id="seg-music">
+        <button class="seg-btn" data-music="1">开</button>
+        <button class="seg-btn" data-music="0">关</button>
+      </div>
+      <p class="tip">程序化合成的环境音乐，首次点击页面后开始播放；每套主题一首，对局结束时自动切到胜利、失败或平局的专属配乐，回放棋局时换成另一首。</p>
+      <p class="tip now" id="lbl-track"></p>
+    </div>
+    <div class="field">
+      <label>背景音乐音量 <b id="lbl-mvol">70%</b></label>
+      <input type="range" id="in-mvol" min="0" max="100" step="5" value="70">
+      <p class="tip">只影响配乐与结局曲，不影响音效。</p>
+    </div>
+    <div class="field">
+      <label>视觉特效 <b id="lbl-fx">开</b></label>
+      <div class="seg" id="seg-fx">
+        <button class="seg-btn" data-fx="1">开</button>
+        <button class="seg-btn" data-fx="0">关</button>
+      </div>
+      <p class="tip">落子涟漪、升变灵体、发芽、伤害飘字与震屏、淘汰碎片、棋盘 3D 倾斜。关闭后只留结果，盘面更安静；残影与提示不受影响。</p>
+    </div>
+    <div class="field">
+      <label>残影与提示 <b id="lbl-hints">开</b></label>
+      <div class="seg" id="seg-hints">
+        <button class="seg-btn" data-hints="1">开</button>
+        <button class="seg-btn" data-hints="0">关</button>
+      </div>
+      <p class="tip">开启时显示残影标记、ASCEND 虚线提示、金光预警与提示文字；关闭后棋盘更简洁，适合熟悉规则后使用。</p>
+    </div>
+    <button class="chip gold close" id="btn-apply">开始新对局</button>
+    <button class="chip close" id="btn-set-close">取消</button>
+  </div>
+</div>
+
+<!-- 规则 -->
+<div class="modal" id="modal">
+  <div class="sheet">
+    <h2>4ASCEND 对战规则</h2>
+    <p>精灵与魔族各持 <em>初始生命</em>（可在设置中调整），在棋盘上以连珠发动攻击。一方生命归零，另一方即获胜。</p>
+    <h4>一、回合</h4>
+    <p>在空的交叉点上落一枚己方棋子，白子先手，双方轮流行动。</p>
+    <h4>二、ASCEND（攻击）</h4>
+    <p>落子后若纵、横或斜向出现 <em>4 枚或以上</em>己方棋子相连，这些棋子会被拿起、进入攻击态势。ASCEND 的棋子不再回到棋盘。若对手不作应对，攻击落下的伤害等于 ASCEND 的棋子数（4 枚 = 4 点）。</p>
+    <h4>三、抵消</h4>
+    <p>对手 ASCEND 后，你若同样连出 ASCEND，则双方战力互相抵消：<em>战力 = 棋子数 + 魔力加成</em>，差值作为伤害落到战力较小的一方。例如你以 4 枚攻击，对手连出 5 枚，你作为进攻方反而会受到 1 点伤害。</p>
+    <h4>四、反击</h4>
+    <p>对手的 ASCEND 会在棋盘上留下<em>残影</em>。若你落在残影上，即可反击：该位置对手的棋子从攻击中失效，伤害随之减少。若失效的棋子带着魔力植物，你将<em>夺得这株植物</em>存入魔力储备。反击可以和抵消在同一次落子中完成。</p>
+    <h4>五、魔力植物</h4>
+    <ul>
+      <li>ASCEND 结算后棋盘会长出魔力植物，且倾向长在<em>对进攻方有利</em>的位置；若连续不断地发动 ASCEND，土地会变得贫瘠，植物生长放缓。</li>
+      <li>落在魔力植物上的棋子参与 ASCEND 时，<em>抵消战力 +1</em>（不增加直接伤害），植物随之消失。</li>
+      <li>反击夺得的植物进入魔力储备，你的下一次 ASCEND 在抵消时每株提供 +1 战力（一次性）。</li>
+    </ul>
+    <h4>六、记录与回放</h4>
+    <p>每一手都会按步记录落点、反击、ASCEND、抵消、伤害与植物生长，并保存局面快照。可在「对局记录」中<em>逐手回放</em>、<em>导出 JSON 棋谱</em>或<em>复制文本棋谱</em>，也可以<em>从任意一手分叉继续对局</em>。</p>
+    <h4>七、胜负</h4>
+    <p>当一方生命值归零时游戏结束；若棋盘全部落满仍未分出胜负，<em>生命值高者胜</em>，生命值相同则<em>盘面棋子多者胜</em>。</p>
+    <h4>八、快捷菜单</h4>
+    <p>在页面任意处<em>右键</em>即可唤出快捷菜单，随时开关背景音乐、音效与全部视觉特效、开新游戏，或把当前这一局重新开始。菜单里的圆点亮着表示该项此刻是开着的。</p>
+    <p>「全部特效」指落子涟漪、升变灵体、发芽、伤害飘字与震屏、淘汰碎片、棋盘 3D 倾斜这些演出；<em>残影标记、ASCEND 虚线与金光预警属于提示</em>，由设置里的「残影与提示」单独控制，两者互不影响。</p>
+    <button class="chip gold close" id="btn-close">明白了，开始对局</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- 右键快捷菜单：覆盖浏览器默认菜单。文字与圆点由 JS 按当前状态写入，
+     所以这里只放骨架，避免两处状态各写一遍 -->
+<div class="ctxmenu" id="ctxmenu" role="menu" aria-label="快捷菜单" aria-hidden="true">
+  <button class="ctx-item" type="button" role="menuitem" data-act="music">
+    <span class="ctx-dot" aria-hidden="true"></span>
+    <span class="ctx-txt">禁用背景音乐</span>
+    <span class="ctx-val">开</span>
+  </button>
+  <button class="ctx-item" type="button" role="menuitem" data-act="sfx">
+    <span class="ctx-dot" aria-hidden="true"></span>
+    <span class="ctx-txt">禁用音效</span>
+    <span class="ctx-val">开</span>
+  </button>
+  <button class="ctx-item" type="button" role="menuitem" data-act="fx">
+    <span class="ctx-dot" aria-hidden="true"></span>
+    <span class="ctx-txt">关闭全部特效</span>
+    <span class="ctx-val">开</span>
+  </button>
+  <div class="ctx-sep" role="separator"></div>
+  <button class="ctx-item plain" type="button" role="menuitem" data-act="new">
+    <span class="ctx-dot" aria-hidden="true"></span>
+    <span class="ctx-txt">新游戏</span>
+  </button>
+  <button class="ctx-item plain" type="button" role="menuitem" data-act="restart">
+    <span class="ctx-dot" aria-hidden="true"></span>
+    <span class="ctx-txt">重新开始</span>
+  </button>
+</div>
+
+<!-- ================= 模块加载器 =================
+ * 8 个经典脚本共享全局词法作用域、顺序敏感，这里按序逐个加载：
+ * 前一个完整就绪（下载成功 + 全局符号校验通过）才加载下一个，
+ * 全部就绪后移除遮罩、放行对局；任一步失败立即中断并给出原因。
+ * 之所以不用普通同步 <script>：那种写法在网络慢时白屏无反馈，
+ * 某个文件 404 时也不会报错，游戏会带着缺失的功能静启。 -->
+<script>
+(function () {
+  "use strict";
+  /* [文件, 需校验的全局符号]：符号全部就绪才算该模块加载完成。
+   * 08-tilt 是 IIFE、没有全局导出，下载成功且无语法错误即通过。 */
+  var MODULES = [
+    ["js/01-core.js",  ["buildBoard", "newState"]],
+    ["js/02-audio.js", ["sfx", "setSfxVol"]],
+    ["js/03-music.js", ["syncMusicUI", "toggleMusic"]],
+    ["js/04-rules.js", ["computeThreats", "endGame"]],
+    ["js/05-play.js",  ["maybeAI", "initAiMode"]],
+    ["js/06-ui.js",    ["renderAll", "toast"]],
+    ["js/07-app.js",   ["newGame", "restartGame"]],
+    ["js/08-tilt.js",  []]
+  ];
+  var TIMEOUT = 15000; /* 单个模块的加载超时（毫秒） */
+
+  var boot    = document.getElementById("boot");
+  var fill    = document.getElementById("boot-fill");
+  var status  = document.getElementById("boot-status");
+  var errBox  = document.getElementById("boot-error");
+  var errMsg  = document.getElementById("boot-error-msg");
+
+  document.getElementById("boot-retry").addEventListener("click", function () {
+    location.reload();
+  });
+
+  /* 顶层 const/let 不挂 window，用间接 eval 沿作用域链查全局词法环境，
+   * function/var 声明同样能查到 */
+  function hasGlobal(name) {
+    try { return typeof eval(name) !== "undefined"; } catch (e) { return false; }
+  }
+
+  function fail(file, why) {
+    errMsg.textContent = "「" + file + "」" + why + "，对局无法开始。请检查网络连接后重试。";
+    errBox.hidden = false;
+    status.textContent = "加载中断";
+    boot.classList.add("boot-failed");
+  }
+
+  function loadModule(i) {
+    if (i >= MODULES.length) { ready(); return; }
+    var file = MODULES[i][0], checks = MODULES[i][1];
+    status.textContent = "正在加载 " + file.replace("js/", "").replace(".js", "") +
+      "（" + (i + 1) + " / " + MODULES.length + "）";
+
+    var s = document.createElement("script");
+    s.src = file;
+    var settled = false;
+
+    var timer = setTimeout(function () {
+      if (settled) return;
+      settled = true;
+      fail(file, "加载超时");
+    }, TIMEOUT);
+
+    s.onload = function () {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      /* 下载成功不等于模块可用：脚本被截断、有语法错误或被扩展拦截时，
+       * onload 同样会触发，必须逐项校验全局符号 */
+      for (var k = 0; k < checks.length; k++) {
+        if (!hasGlobal(checks[k])) {
+          fail(file, "未完整执行（缺少 " + checks[k] + "）");
+          return;
+        }
+      }
+      fill.style.width = Math.round((i + 1) / MODULES.length * 100) + "%";
+      loadModule(i + 1);
+    };
+
+    s.onerror = function () {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      fail(file, "加载失败");
+    };
+
+    document.body.appendChild(s);
+  }
+
+  function ready() {
+    status.textContent = "准备就绪";
+    boot.classList.add("boot-done");
+    /* 等淡出动画结束再移除节点，避免遮罩突然消失闪一下棋盘 */
+    setTimeout(function () {
+      if (boot.parentNode) boot.parentNode.removeChild(boot);
+    }, 450);
+  }
+
+  loadModule(0);
+})();
+</script>
+</body>
+</html>
