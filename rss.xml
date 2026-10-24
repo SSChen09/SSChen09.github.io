@@ -1,4 +1,672 @@
-<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>洛の间</title><description>苏洛洛辰qwq</description><link>https://blog.sslc0721.xyz/</link><templateTheme>Firefly</templateTheme><templateThemeVersion>6.15.2</templateThemeVersion><templateThemeUrl>https://github.com/CuteLeaf/Firefly</templateThemeUrl><lastBuildDate>2026年10月24日 12:47:54</lastBuildDate><item><title>Firefly 简单使用指南</title><link>https://blog.sslc0721.xyz/posts/guide/</link><guid isPermaLink="true">https://blog.sslc0721.xyz/posts/guide/</guid><description>如何使用 Firefly 博客模板。</description><pubDate>Fri, 02 Jan 1970 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;这个博客模板是基于 &lt;a href=&quot;https://astro.build/&quot; target=&quot;_blank&quot;&gt;Astro&lt;/a&gt; 构建的。对于本指南中未提及的内容，您可以在 &lt;a href=&quot;https://docs.astro.build/&quot; target=&quot;_blank&quot;&gt;Astro 文档&lt;/a&gt; 中找到答案。&lt;/p&gt;
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>洛の间</title><description>苏洛洛辰qwq</description><link>https://blog.sslc0721.xyz/</link><templateTheme>Firefly</templateTheme><templateThemeVersion>6.15.2</templateThemeVersion><templateThemeUrl>https://github.com/CuteLeaf/Firefly</templateThemeUrl><lastBuildDate>2026年10月24日 22:15:07</lastBuildDate><item><title>PicCom：一个隐写文件工具</title><link>https://blog.sslc0721.xyz/posts/pic-com/</link><guid isPermaLink="true">https://blog.sslc0721.xyz/posts/pic-com/</guid><description>第一篇技术向的文章，没有什么含金量</description><pubDate>Sat, 24 Oct 2026 00:00:00 GMT</pubDate><content:encoded>&lt;blockquote&gt;&lt;p&gt;基于 &lt;code&gt;PicCom-v1.0&lt;/code&gt; 工具集下的三个工具脚本（&lt;code&gt;steg.py&lt;/code&gt;、&lt;code&gt;steg-audit.py&lt;/code&gt;、&lt;code&gt;img-split.py&lt;/code&gt;）的讲解&lt;/p&gt;&lt;/blockquote&gt;
+&lt;blockquote&gt;&lt;p&gt;下载链接：&lt;a href=&quot;https://github.com/SSChen09/su.res/releases/tag/tools-piccom_v1.0&quot; target=&quot;_blank&quot;&gt;PicCom-v1.0&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;
+&lt;hr /&gt;
+&lt;section&gt;&lt;h2&gt;1. 这套东西到底在解决什么问题&lt;a href=&quot;#1-这套东西到底在解决什么问题&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;一句话：&lt;strong&gt;在一张图片里，为不同的密钥准备不同的内容，而且让不知道密钥的人看不出图里还有别的东西。&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;这个目标决定了它必须同时是三样东西：&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;组件&lt;/th&gt;&lt;th&gt;角色&lt;/th&gt;&lt;th&gt;视角&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;steg.py&lt;/code&gt;&lt;/td&gt;&lt;td&gt;嵌入 / 提取&lt;/td&gt;&lt;td&gt;防守方：我想藏&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;steg-audit.py&lt;/code&gt;&lt;/td&gt;&lt;td&gt;槽位枚举 / 字典 / 穷举&lt;/td&gt;&lt;td&gt;攻击方：我想挖&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;img-split.py&lt;/code&gt;&lt;/td&gt;&lt;td&gt;切图 / 合图&lt;/td&gt;&lt;td&gt;传输方：我想把一张图拆成几块分别送出去&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;p&gt;三个脚本不是随意堆在一起的。&lt;code&gt;steg-audit.py&lt;/code&gt; 完全不 import &lt;code&gt;steg.py&lt;/code&gt;，却把 &lt;code&gt;MAGIC&lt;/code&gt;、&lt;code&gt;VERSION&lt;/code&gt;、&lt;code&gt;KDF_ITERS&lt;/code&gt;、&lt;code&gt;SLOT_HEADER&lt;/code&gt;、加密原语全部复制了一份。这不是懒，而是刻意的设计：&lt;strong&gt;格式即协议&lt;/strong&gt;。只要两边对常量表的理解一致，实现可以各写各的。代价是任何一方改动常量都会导致”永远解不开”，所以两个文件的常量区都写着”必须与另一方一致”。&lt;/p&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;明文文件&lt;br /&gt;&lt;br /&gt;+ 密钥&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;pack_plain&lt;br /&gt;&lt;br /&gt;文件名长度+文件名+内容&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;encrypt_slot&lt;br /&gt;&lt;br /&gt;PBKDF2 → 密钥流 → HMAC&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;槽位 slot&lt;br /&gt;&lt;br /&gt;salt+nonce+mac+len+ct&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;build_payload&lt;br /&gt;&lt;br /&gt;MAGIC+ver+count+slots&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;LSB 通道&lt;br /&gt;&lt;br /&gt;写进像素最低位&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;append 通道&lt;br /&gt;&lt;br /&gt;写进 IEND 之后&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;PNG 输出&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;
+&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;明文文件&lt;br /&gt;&lt;br /&gt;+ 密钥&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;pack_plain&lt;br /&gt;&lt;br /&gt;文件名长度+文件名+内容&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;encrypt_slot&lt;br /&gt;&lt;br /&gt;PBKDF2 → 密钥流 → HMAC&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;槽位 slot&lt;br /&gt;&lt;br /&gt;salt+nonce+mac+len+ct&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;build_payload&lt;br /&gt;&lt;br /&gt;MAGIC+ver+count+slots&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;LSB 通道&lt;br /&gt;&lt;br /&gt;写进像素最低位&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;append 通道&lt;br /&gt;&lt;br /&gt;写进 IEND 之后&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;PNG 输出&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;hr /&gt;&lt;/section&gt;
+&lt;section&gt;&lt;h2&gt;2. 二进制格式：一个”槽位”长什么样&lt;a href=&quot;#2-二进制格式一个槽位长什么样&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;理解这套工具，只需要理解两层的字节布局。&lt;strong&gt;第一层是 payload 容器&lt;/strong&gt;：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;偏移  长度  含义&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;0     4     MAGIC = b&quot;STEG&quot;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;4     1     VERSION = 0x04&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;5     2     槽位数量 n（大端 uint16，上限 65535）&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;5&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;7     ...   n 个连续槽位&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;第二层是每个槽位&lt;/strong&gt;，固定头 72 字节：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;偏移  长度  含义&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;0     16    salt        —— PBKDF2 的盐，每槽独立随机&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;16    16    nonce       —— 密钥流的起始随机数&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;32    32    HMAC-SHA256 —— 完整性标签&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;5&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;64    8     ct_len      —— 密文长度（大端 uint64）&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;6&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;72    ct_len 密文&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;密文解开之后，明文本身还有一层内嵌结构（&lt;code&gt;pack_plain&lt;/code&gt;）：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;2 字节 文件名长度（大端 uint16）&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;N 字节 UTF-8 文件名&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;剩余   文件原始字节&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;所以一个 20 字节的 &lt;code&gt;secret.txt&lt;/code&gt; 实际占用：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;7 (payload 头) + 72 (槽位头) + 2 (名字长度) + 10 (&quot;secret.txt&quot;) + 20 (内容) = 111 字节&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;实测输出正是 &lt;code&gt;使用容量：888/360000&lt;/code&gt;，888 位 = 111 字节，对得上。&lt;/p&gt;&lt;p&gt;&lt;strong&gt;这里有个容易被忽略的设计取舍&lt;/strong&gt;：&lt;code&gt;ct_len&lt;/code&gt; 和 &lt;code&gt;n&lt;/code&gt; 都是明文。这让提取端可以只读 7 个字节就知道该往后读多少，实现上非常省事；但代价是——&lt;strong&gt;任何人都能数出图里有几个文件、每个文件大概多大&lt;/strong&gt;，完全不需要密钥。见第 8 节。&lt;/p&gt;&lt;hr /&gt;&lt;/section&gt;
+&lt;section&gt;&lt;h2&gt;3. 密码学原语：三层手搓的拼装&lt;a href=&quot;#3-密码学原语三层手搓的拼装&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;&lt;section&gt;&lt;h3&gt;3.1 KDF：PBKDF2-HMAC-SHA256&lt;a href=&quot;#31-kdfpbkdf2-hmac-sha256&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;def&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;derive_key&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;signature&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;salt&lt;/span&gt;&lt;/span&gt;&lt;span&gt;):&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;return&lt;/span&gt;&lt;span&gt;&lt;span&gt; hashlib.&lt;/span&gt;&lt;span&gt;pbkdf2_hmac&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;        &lt;/span&gt;&lt;span&gt;&quot;sha256&quot;&lt;/span&gt;&lt;span&gt;&lt;span&gt;, signature.&lt;/span&gt;&lt;span&gt;encode&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;/span&gt;&lt;span&gt;&quot;utf-8&quot;&lt;/span&gt;&lt;span&gt;&lt;span&gt;), salt, &lt;/span&gt;&lt;span&gt;KDF_ITERS&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;/span&gt;&lt;span&gt;dklen&lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt;32&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;100,000 次迭代，输出 32 字节。作用很明确：&lt;strong&gt;把”人脑能记住的短口令”拉伸成”暴力破解很贵的密钥”&lt;/strong&gt;。&lt;/p&gt;&lt;p&gt;实测成本（单次调用，Python 3.12）：&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;KDF_ITERS&lt;/th&gt;&lt;th&gt;单次耗时&lt;/th&gt;&lt;th&gt;单线程速率&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;100,000&lt;/td&gt;&lt;td&gt;34.5 ms&lt;/td&gt;&lt;td&gt;≈ 29 次/秒&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;1,000&lt;/td&gt;&lt;td&gt;0.4 ms&lt;/td&gt;&lt;td&gt;≈ 2590 次/秒&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;p&gt;这个 86 倍的差距，就是整套系统安全性的全部来源。它同时也是审计工具的性能天花板——后面第 9 节会展开。&lt;/p&gt;&lt;p&gt;注意 salt 是&lt;strong&gt;每槽独立随机&lt;/strong&gt;的。这在密码学上是正确的做法（防止彩虹表、防止同一密钥在不同槽位派生出相同子密钥），但它带来一个副作用：&lt;strong&gt;派生结果无法在槽位之间复用&lt;/strong&gt;。N 个槽位意味着每个候选密钥要做 N 次 PBKDF2。这一点后面会变成攻击侧成本模型里的关键变量。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;3.2 密钥流：HMAC 当 PRF 用&lt;a href=&quot;#32-密钥流hmac-当-prf-用&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;def&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;stream_xor&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;data&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;key&lt;/span&gt;&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;nonce&lt;/span&gt;&lt;/span&gt;&lt;span&gt;):&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;n_blocks &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; (n &lt;/span&gt;&lt;span&gt;+&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;31&lt;/span&gt;&lt;span&gt;&lt;span&gt;) &lt;/span&gt;&lt;span&gt;//&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;/span&gt;&lt;span&gt;32&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;ks &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;bytearray&lt;/span&gt;&lt;span&gt;()&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;for&lt;/span&gt;&lt;span&gt; c &lt;/span&gt;&lt;span&gt;in&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;range&lt;/span&gt;&lt;span&gt;(n_blocks):&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;5&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;        &lt;/span&gt;&lt;/span&gt;&lt;span&gt;ks.&lt;/span&gt;&lt;span&gt;extend&lt;/span&gt;&lt;span&gt;(hmac.&lt;/span&gt;&lt;span&gt;new&lt;/span&gt;&lt;span&gt;(key, nonce &lt;/span&gt;&lt;span&gt;+&lt;/span&gt;&lt;span&gt; c.&lt;/span&gt;&lt;span&gt;to_bytes&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;8&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;&quot;big&quot;&lt;/span&gt;&lt;span&gt;&lt;span&gt;), hashlib.sha256).&lt;/span&gt;&lt;span&gt;digest&lt;/span&gt;&lt;span&gt;())&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;6&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;return&lt;/span&gt;&lt;span&gt;&lt;span&gt; (np.&lt;/span&gt;&lt;span&gt;frombuffer&lt;/span&gt;&lt;span&gt;(data, &lt;/span&gt;&lt;/span&gt;&lt;span&gt;dtype&lt;/span&gt;&lt;span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt;np.uint8)&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;7&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;            &lt;/span&gt;&lt;/span&gt;&lt;span&gt;^&lt;/span&gt;&lt;span&gt; np.&lt;/span&gt;&lt;span&gt;frombuffer&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;bytes&lt;/span&gt;&lt;span&gt;(ks[:n]), &lt;/span&gt;&lt;span&gt;dtype&lt;/span&gt;&lt;span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt;np.uint8)).&lt;/span&gt;&lt;span&gt;tobytes&lt;/span&gt;&lt;span&gt;()&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;这是一个教科书式的 &lt;strong&gt;PRF-CTR 密钥流&lt;/strong&gt;：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;keystream_block[c] = HMAC-SHA256(key, nonce || uint64_be(c))&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;每个 32 字节的密钥流块，都是”nonce + 计数器”的 HMAC 输出。因为 HMAC 在固定 key 下是伪随机函数，所以把输出当密钥流用是安全的；&lt;code&gt;nonce&lt;/code&gt; 保证同一个 key 每次加密的密钥流不同（这也是为什么每个槽位都要重新随机 nonce）。&lt;/p&gt;&lt;p&gt;这里用 NumPy 做 XOR 是个务实的选择：纯 Python 逐字节异或 20KB 要几十毫秒，NumPy 的 &lt;code&gt;frombuffer&lt;/code&gt; + 向量化异或基本是内存带宽级别。&lt;/p&gt;&lt;p&gt;不过有个性能细节：&lt;code&gt;n_blocks&lt;/code&gt; 次 HMAC 调用是纯 Python 循环，1MB 的文件就是 32768 次函数调用。实测这部分远不是瓶颈（KDF 才是），但如果要处理几十 MB 的文件，这里会成为第二个瓶颈。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;3.3 Encrypt-then-MAC&lt;a href=&quot;#33-encrypt-then-mac&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;def&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;encrypt_slot&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;signature&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;plaintext&lt;/span&gt;&lt;/span&gt;&lt;span&gt;):&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;salt  &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; secrets.&lt;/span&gt;&lt;span&gt;token_bytes&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;16&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;nonce &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; secrets.&lt;/span&gt;&lt;span&gt;token_bytes&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;16&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;key   &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;derive_key&lt;/span&gt;&lt;span&gt;(signature, salt)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;5&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;ct    &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;stream_xor&lt;/span&gt;&lt;span&gt;(plaintext, key, nonce)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;6&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;ct_len &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; struct.&lt;/span&gt;&lt;span&gt;pack&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;&quot;&amp;gt;Q&quot;&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;len&lt;/span&gt;&lt;span&gt;(ct))&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;7&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;mac &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; hmac.&lt;/span&gt;&lt;span&gt;new&lt;/span&gt;&lt;span&gt;(key, salt &lt;/span&gt;&lt;span&gt;+&lt;/span&gt;&lt;span&gt; nonce &lt;/span&gt;&lt;span&gt;+&lt;/span&gt;&lt;span&gt; ct_len &lt;/span&gt;&lt;span&gt;+&lt;/span&gt;&lt;span&gt; ct, hashlib.sha256).&lt;/span&gt;&lt;span&gt;digest&lt;/span&gt;&lt;span&gt;()&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;8&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;return&lt;/span&gt;&lt;span&gt;&lt;span&gt; salt &lt;/span&gt;&lt;span&gt;+&lt;/span&gt;&lt;span&gt; nonce &lt;/span&gt;&lt;span&gt;+&lt;/span&gt;&lt;span&gt; mac &lt;/span&gt;&lt;span&gt;+&lt;/span&gt;&lt;span&gt; ct_len &lt;/span&gt;&lt;span&gt;+&lt;/span&gt;&lt;span&gt; ct&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;结构是标准的 &lt;strong&gt;Encrypt-then-MAC&lt;/strong&gt;：先加密，再对”所有会影响解密结果的元数据 + 密文”整体做 MAC。MAC 覆盖了 &lt;code&gt;salt&lt;/code&gt;、&lt;code&gt;nonce&lt;/code&gt;、&lt;code&gt;ct_len&lt;/code&gt;、&lt;code&gt;ct&lt;/code&gt; 四项，也就是说&lt;strong&gt;任何一个字节被篡改，MAC 都会失败&lt;/strong&gt;。这比先 MAC 后加密（MAC-then-Encrypt）安全，因为攻击者无法在解密前操纵密文结构。&lt;/p&gt;&lt;p&gt;验证端用的是：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;if&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;not&lt;/span&gt;&lt;span&gt;&lt;span&gt; hmac.&lt;/span&gt;&lt;span&gt;compare_digest&lt;/span&gt;&lt;span&gt;(mac, expected):&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;return&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;None&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;compare_digest&lt;/code&gt; 而不是 &lt;code&gt;==&lt;/code&gt;，这是必须的。Python 的 &lt;code&gt;==&lt;/code&gt; 对 bytes 做短路比较，第一个不同字节就返回，攻击者可以通过测量响应时间逐字节猜出正确 MAC（时序侧信道）。&lt;code&gt;compare_digest&lt;/code&gt; 是常数时间实现。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;3.4 一个真实的密码学瑕疵：密钥没有分离&lt;a href=&quot;#34-一个真实的密码学瑕疵密钥没有分离&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;仔细看 &lt;code&gt;encrypt_slot&lt;/code&gt;：&lt;strong&gt;同一个 &lt;code&gt;key&lt;/code&gt; 既用来生成密钥流，又用来算 HMAC。&lt;/strong&gt;&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;ct  &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;stream_xor&lt;/span&gt;&lt;span&gt;(plaintext, key, nonce)      &lt;/span&gt;&lt;/span&gt;&lt;span&gt;# key 用于 PRF-CTR&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;mac &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; hmac.&lt;/span&gt;&lt;span&gt;new&lt;/span&gt;&lt;span&gt;(key, &lt;/span&gt;&lt;span&gt;...&lt;/span&gt;&lt;span&gt;)                      &lt;/span&gt;&lt;/span&gt;&lt;span&gt;# 同一个 key 用于 HMAC&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;标准做法是从 PBKDF2 的输出再派生两把子密钥，加标签做域分离：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;enc_key &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;hkdf_expand&lt;/span&gt;&lt;span&gt;(key, &lt;/span&gt;&lt;/span&gt;&lt;span&gt;b&lt;/span&gt;&lt;span&gt;&quot;enc&quot;&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;32&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;mac_key &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;hkdf_expand&lt;/span&gt;&lt;span&gt;(key, &lt;/span&gt;&lt;/span&gt;&lt;span&gt;b&lt;/span&gt;&lt;span&gt;&quot;mac&quot;&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;32&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;当前实现里，密钥流输入是 &lt;code&gt;nonce || counter(8)&lt;/code&gt;（24 字节），MAC 输入是 &lt;code&gt;salt || nonce || ct_len || ct&lt;/code&gt;（≥ 40 字节），两者的输入空间在结构上不重叠，所以没有已知的实际攻击。但这属于”靠巧合安全”而非”靠设计安全”——一旦将来改动 MAC 输入格式，就可能撞上密钥流输入，而审计者不会有任何提示。&lt;/p&gt;&lt;hr /&gt;&lt;/section&gt;&lt;/section&gt;
+&lt;section&gt;&lt;h2&gt;4. 通道一：LSB（最低有效位）&lt;a href=&quot;#4-通道一lsb最低有效位&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;&lt;section&gt;&lt;h3&gt;原理&lt;a href=&quot;#原理&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;一张 RGB 图片，每个像素有三个 0–255 的通道值。把某个通道值改成 &lt;code&gt;v ^ 1&lt;/code&gt;（即最低位翻转），颜色变化最多 1/255 ≈ 0.4%，人眼完全无法分辨。于是每个通道都能携带 1 bit。&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;def&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;_lsb_write_bytes&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;flat&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;off&lt;/span&gt;&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;data&lt;/span&gt;&lt;/span&gt;&lt;span&gt;):&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;bits &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; np.&lt;/span&gt;&lt;span&gt;unpackbits&lt;/span&gt;&lt;span&gt;(np.&lt;/span&gt;&lt;span&gt;frombuffer&lt;/span&gt;&lt;span&gt;(data, &lt;/span&gt;&lt;span&gt;dtype&lt;/span&gt;&lt;span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt;np.uint8))&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;s, e &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; off &lt;/span&gt;&lt;span&gt;*&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;8&lt;/span&gt;&lt;span&gt;&lt;span&gt;, off &lt;/span&gt;&lt;span&gt;*&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;/span&gt;&lt;span&gt;8&lt;/span&gt;&lt;span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;+&lt;/span&gt;&lt;span&gt; bits.size&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;flat[s:e] &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; (flat[s:e] &lt;/span&gt;&lt;span&gt;&amp;amp;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;0x&lt;/span&gt;&lt;span&gt;FE&lt;/span&gt;&lt;span&gt;&lt;span&gt;) &lt;/span&gt;&lt;span&gt;|&lt;/span&gt;&lt;span&gt; bits     &lt;/span&gt;&lt;/span&gt;&lt;span&gt;# 清最低位，写入新位&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;&amp;amp; 0xFE&lt;/code&gt; 清掉最低位，&lt;code&gt;| bits&lt;/code&gt; 写入目标位。整个图片被 &lt;code&gt;reshape(-1)&lt;/code&gt; 摊平成一维，所以&lt;strong&gt;嵌入顺序是 R₀G₀B₀R₁G₁B₁…&lt;/strong&gt;，按行优先扫过全部像素。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;容量&lt;a href=&quot;#容量&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;容量(字节) = 宽 × 高 × 通道数 / 8&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;400×300 RGB 实测容量 45,000 字节。1000×1000 RGB 是 375 KB。这是”每像素 3 bit”的经典方案，如果用 2 个最低位（2-LSB）容量翻倍，但视觉和鲁棒性都会明显变差。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;视觉影响（实测）&lt;a href=&quot;#视觉影响实测&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;用 400×300 的载体嵌入一个 20 字节文件（888 bit）：&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;指标&lt;/th&gt;&lt;th&gt;实测值&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;最大像素差&lt;/td&gt;&lt;td&gt;1（只有最低位变了）&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;PSNR&lt;/td&gt;&lt;td&gt;77.29 dB&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;被改动的通道占比&lt;/td&gt;&lt;td&gt;0.12%&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;p&gt;PSNR 77 dB 意味着肉眼绝对看不出差别（一般 &amp;gt;40 dB 就认为视觉无损）。0.12% 这个数字说明载荷相对于载体极小——填满容量时会接近 100%。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;体积代价（实测，这一点常被误解）&lt;a href=&quot;#体积代价实测这一点常被误解&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;在照片类载体（400×300，PNG 67,414 字节）上：&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;载荷&lt;/th&gt;&lt;th&gt;输出 PNG 大小&lt;/th&gt;&lt;th&gt;增量&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;无&lt;/td&gt;&lt;td&gt;67,414&lt;/td&gt;&lt;td&gt;—&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;20 KB（LSB）&lt;/td&gt;&lt;td&gt;94,110&lt;/td&gt;&lt;td&gt;+26,696&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;20 KB（append）&lt;/td&gt;&lt;td&gt;87,998&lt;/td&gt;&lt;td&gt;+20,584&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;p&gt;LSB 的增量比载荷本身多出约 30%。原因很直接：PNG 用 Deflate 压缩，它依赖相邻像素的相关性；把最低位随机化，等于给每个像素注入了一点白噪声，压缩率下降。&lt;strong&gt;载荷越大、填充越满，这个惩罚越重。&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;而 append 的增量几乎精确等于载荷 + 头部开销（20,480 内容 + 7 文件名 + 2 名字长度 + 7 payload 头 + 72 槽位头 + 16 尾部标记 = 20,584，与实测逐字节吻合），因为尾部数据完全不参与图像压缩。&lt;/p&gt;&lt;hr /&gt;&lt;/section&gt;&lt;/section&gt;
+&lt;section&gt;&lt;h2&gt;5. 通道二：append（尾部追加）&lt;a href=&quot;#5-通道二append尾部追加&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;&lt;section&gt;&lt;h3&gt;原理&lt;a href=&quot;#原理-1&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;PNG 文件以 &lt;code&gt;IEND&lt;/code&gt; 块结尾。绝大多数解码器读到 &lt;code&gt;IEND&lt;/code&gt; 就停止解析，&lt;strong&gt;后面的字节会被静默忽略&lt;/strong&gt;。于是可以把任意数据贴在 &lt;code&gt;IEND&lt;/code&gt; 之后，图片照常显示。&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;Path&lt;/span&gt;&lt;span&gt;(out_path).&lt;/span&gt;&lt;span&gt;write_bytes&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;carrier_bytes &lt;/span&gt;&lt;span&gt;+&lt;/span&gt;&lt;span&gt; new_payload &lt;/span&gt;&lt;span&gt;+&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;APPEND_MARK&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;+&lt;/span&gt;&lt;span&gt; struct.&lt;/span&gt;&lt;span&gt;pack&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;&quot;&amp;gt;Q&quot;&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;len&lt;/span&gt;&lt;span&gt;(new_payload))&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;尾部结构是「载荷 + 标记 &lt;code&gt;STEGv4ND&lt;/code&gt; + 8 字节长度」。读的时候从文件末尾倒推：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;def&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;_split_append&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;raw&lt;/span&gt;&lt;span&gt;):&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;if&lt;/span&gt;&lt;span&gt;&lt;span&gt; raw[&lt;/span&gt;&lt;span&gt;-&lt;/span&gt;&lt;span&gt;APPEND_TAIL&lt;/span&gt;&lt;span&gt;:&lt;/span&gt;&lt;span&gt;-&lt;/span&gt;&lt;/span&gt;&lt;span&gt;8&lt;/span&gt;&lt;span&gt;&lt;span&gt;] &lt;/span&gt;&lt;span&gt;!=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;APPEND_MARK&lt;/span&gt;&lt;span&gt;:&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;        &lt;/span&gt;&lt;span&gt;raise&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;ValueError&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;&quot;尾部标记不匹配&quot;&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;payload_len &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; struct.&lt;/span&gt;&lt;span&gt;unpack&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;&quot;&amp;gt;Q&quot;&lt;/span&gt;&lt;span&gt;&lt;span&gt;, raw[&lt;/span&gt;&lt;span&gt;-&lt;/span&gt;&lt;/span&gt;&lt;span&gt;8&lt;/span&gt;&lt;span&gt;:])[&lt;/span&gt;&lt;span&gt;0&lt;/span&gt;&lt;span&gt;]&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;5&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;start &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;len&lt;/span&gt;&lt;span&gt;&lt;span&gt;(raw) &lt;/span&gt;&lt;span&gt;-&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;APPEND_TAIL&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-&lt;/span&gt;&lt;span&gt; payload_len&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;6&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;return&lt;/span&gt;&lt;span&gt;&lt;span&gt; raw[:start], raw[start:start &lt;/span&gt;&lt;span&gt;+&lt;/span&gt;&lt;span&gt; payload_len]&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;这个设计的巧妙之处是&lt;strong&gt;长度放在最末尾&lt;/strong&gt;，所以提取端不需要扫描、不需要知道载体多大，直接从后往前读 16 字节就能定位。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;但它的隐蔽性是零（实测）&lt;a href=&quot;#但它的隐蔽性是零实测&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;我在 400×300 PNG 上 embed 一个文件，然后直接看 &lt;code&gt;IEND&lt;/code&gt; 之后的字节：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;IEND 位置: 1129   文件总长: 1264&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;IEND 之后字节数: 127&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;尾部内容(前 96 字节):&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;b&apos;STEG\x04\x00\x01\xbfB \x93vU\xf4\xec...&apos;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;5&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;是否含明文标记 STEGv4ND: True&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;6&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;是否含明文 MAGIC STEG: True&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;&lt;code&gt;STEG&lt;/code&gt; 就大剌剌地躺在 &lt;code&gt;IEND&lt;/code&gt; 后面第 0 个字节。&lt;/strong&gt; 任何 &lt;code&gt;hexdump&lt;/code&gt;、&lt;code&gt;binwalk&lt;/code&gt;、&lt;code&gt;pngcheck&lt;/code&gt;、甚至 &lt;code&gt;grep -a STEG&lt;/code&gt; 都能一秒发现。这个通道提供的是”方便”，不是”隐蔽”。&lt;/p&gt;&lt;p&gt;两个通道的对比：&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;维度&lt;/th&gt;&lt;th&gt;LSB&lt;/th&gt;&lt;th&gt;append&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;隐蔽性&lt;/td&gt;&lt;td&gt;中（需要统计检测）&lt;/td&gt;&lt;td&gt;无（明文标记）&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;抗重编码&lt;/td&gt;&lt;td&gt;无（一次 JPEG 压缩即毁）&lt;/td&gt;&lt;td&gt;无（尾部被剥离）&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;抗裁剪/缩放&lt;/td&gt;&lt;td&gt;无&lt;/td&gt;&lt;td&gt;有（只要字节不被处理）&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;容量&lt;/td&gt;&lt;td&gt;W·H·C/8&lt;/td&gt;&lt;td&gt;无上限&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;体积代价&lt;/td&gt;&lt;td&gt;≈ 载荷 × 1.3&lt;/td&gt;&lt;td&gt;≈ 载荷&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;实现复杂度&lt;/td&gt;&lt;td&gt;中&lt;/td&gt;&lt;td&gt;低&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;p&gt;&lt;strong&gt;两者都无法抵抗”重新编码”&lt;/strong&gt;，这是所有图片隐写的共同软肋。区别在于 LSB 是被像素操作杀死，append 是被”重新保存图片”这个动作杀死（保存会重写整个文件，尾部自然消失）。&lt;/p&gt;&lt;hr /&gt;&lt;/section&gt;&lt;/section&gt;
+&lt;section&gt;&lt;h2&gt;6. 为什么”强制 PNG”是整个设计的地基&lt;a href=&quot;#6-为什么强制-png是整个设计的地基&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;这是 &lt;code&gt;steg.py&lt;/code&gt; 里看起来最”啰嗦”、实际上最关键的部分。&lt;/p&gt;&lt;p&gt;JPEG 是有损压缩：DCT 变换 → 量化 → 熵编码。解码出来的像素和原始像素并不完全相同，&lt;strong&gt;最低位完全是压缩算法的产物，没有任何信息承载力&lt;/strong&gt;。如果把 LSB 载荷写进 JPEG 再存成 JPEG，量化过程会把刚写进去的比特全部抹掉。&lt;/p&gt;&lt;p&gt;所以代码做了三件事：&lt;/p&gt;&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;输出路径强制 &lt;code&gt;.png&lt;/code&gt;&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;def&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;force_png_path&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;output_path&lt;/span&gt;&lt;span&gt;):&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;p &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;Path&lt;/span&gt;&lt;span&gt;(output_path)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;if&lt;/span&gt;&lt;span&gt;&lt;span&gt; p.suffix.&lt;/span&gt;&lt;span&gt;lower&lt;/span&gt;&lt;span&gt;() &lt;/span&gt;&lt;span&gt;==&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;/span&gt;&lt;span&gt;&quot;.png&quot;&lt;/span&gt;&lt;span&gt;:&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;        &lt;/span&gt;&lt;span&gt;return&lt;/span&gt;&lt;span&gt; p&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;5&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;new_p &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; p.&lt;/span&gt;&lt;span&gt;with_suffix&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;&quot;.png&quot;&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;6&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;print&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;f&lt;/span&gt;&lt;span&gt;&quot;输出自动改为 PNG：&lt;/span&gt;&lt;span&gt;{&lt;/span&gt;&lt;span&gt;new_p&lt;/span&gt;&lt;span&gt;}&lt;/span&gt;&lt;span&gt;&quot;&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;7&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;return&lt;/span&gt;&lt;span&gt; new_p&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;载体先解码，再以 PNG 无损重新编码&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;def&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;ensure_png_bytes&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;carrier_path&lt;/span&gt;&lt;span&gt;):&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;raw &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;Path&lt;/span&gt;&lt;span&gt;(carrier_path).&lt;/span&gt;&lt;span&gt;read_bytes&lt;/span&gt;&lt;span&gt;()&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;if&lt;/span&gt;&lt;span&gt; raw[:&lt;/span&gt;&lt;span&gt;8&lt;/span&gt;&lt;span&gt;&lt;span&gt;] &lt;/span&gt;&lt;span&gt;==&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;PNG_SIG&lt;/span&gt;&lt;span&gt;:&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;        &lt;/span&gt;&lt;span&gt;return&lt;/span&gt;&lt;span&gt; raw                       &lt;/span&gt;&lt;span&gt;# 已经是 PNG，原样返回&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;5&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;...&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;6&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;img &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; Image.&lt;/span&gt;&lt;span&gt;open&lt;/span&gt;&lt;span&gt;(carrier_path)       &lt;/span&gt;&lt;span&gt;# 解码成像素&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;7&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;return&lt;/span&gt;&lt;span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;to_png_bytes&lt;/span&gt;&lt;span&gt;(img)             &lt;/span&gt;&lt;/span&gt;&lt;span&gt;# 无损编码回 PNG&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;对有损载体给出显式提示&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;LOSSY_EXTS&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; {&lt;/span&gt;&lt;/span&gt;&lt;span&gt;&quot;.jpg&quot;&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;&quot;.jpeg&quot;&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;&quot;.jpe&quot;&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;&quot;.jfif&quot;&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;&quot;.heic&quot;&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;&quot;.avif&quot;&lt;/span&gt;&lt;span&gt;}&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;实测输出：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;检测到有损载体 cover.jpg（.jpg），LSB 读取像素后以 PNG 无损保存&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;这个逻辑是对的：&lt;strong&gt;隐写的载体必须是”像素”而不是”文件格式”&lt;/strong&gt;。只要最后落在 PNG 上，写入的比特就一定能原样读回来。&lt;/p&gt;&lt;section&gt;&lt;h3&gt;代价：体积暴涨&lt;a href=&quot;#代价体积暴涨&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;实测把一张 8,962 字节的 JPEG 转成 PNG：&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;文件&lt;/th&gt;&lt;th&gt;大小&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;cover.jpg&lt;/code&gt;&lt;/td&gt;&lt;td&gt;8,962&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;cover_from_jpg.png&lt;/code&gt;（直接转换，无载荷）&lt;/td&gt;&lt;td&gt;67,414&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;p&gt;&lt;strong&gt;7.5 倍。&lt;/strong&gt; 这不是 LSB 造成的，而是”把有损压缩的噪声像素无损存下来”的必然结果——JPEG 的压缩优势全部还回去了。&lt;/p&gt;&lt;p&gt;这带来一个很现实的副作用：&lt;strong&gt;一张 9KB 的图发出去，对方收到 67KB 的 PNG，这本身就是异常。&lt;/strong&gt; 如果传输环境对体积敏感（聊天软件会二次压缩），这个方案会立刻暴露或者直接失效。&lt;/p&gt;&lt;hr /&gt;&lt;/section&gt;&lt;/section&gt;
+&lt;section&gt;&lt;h2&gt;7. 多槽位：一图多密&lt;a href=&quot;#7-多槽位一图多密&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;&lt;code&gt;-t a.txt:key_a b.jpg:key_b&lt;/code&gt; 可以一次藏多个文件，每个独立密钥。提取时用哪个密钥，就只解出对应的那一个：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;def&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;_try_extract&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;slots&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;outdir&lt;/span&gt;&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;signature&lt;/span&gt;&lt;/span&gt;&lt;span&gt;):&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;matched &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;0&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;for&lt;/span&gt;&lt;span&gt; i, slot &lt;/span&gt;&lt;span&gt;in&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;enumerate&lt;/span&gt;&lt;span&gt;(slots):&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;        &lt;/span&gt;&lt;/span&gt;&lt;span&gt;pt &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;try_decrypt_slot&lt;/span&gt;&lt;span&gt;(slot, signature)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;5&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;        &lt;/span&gt;&lt;span&gt;if&lt;/span&gt;&lt;span&gt; pt &lt;/span&gt;&lt;span&gt;is&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;None&lt;/span&gt;&lt;span&gt;:&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;6&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;            &lt;/span&gt;&lt;span&gt;continue&lt;/span&gt;&lt;span&gt;                    &lt;/span&gt;&lt;span&gt;# 这个槽位不是你的&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;7&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;        &lt;/span&gt;&lt;/span&gt;&lt;span&gt;...&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;8&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;        &lt;/span&gt;&lt;/span&gt;&lt;span&gt;matched &lt;/span&gt;&lt;span&gt;+=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;1&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;9&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;...&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;因为每个槽位有自己的 salt，同一个密钥在不同槽位会派生出不同子密钥，所以&lt;strong&gt;一个密钥只会命中它对应的那个槽位&lt;/strong&gt;，其余槽位对它来说就是随机字节，MAC 校验自然失败。&lt;/p&gt;&lt;p&gt;追加槽位靠 &lt;code&gt;-a/--add-slot&lt;/code&gt;：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;if&lt;/span&gt;&lt;span&gt; add_slot &lt;/span&gt;&lt;span&gt;and&lt;/span&gt;&lt;span&gt;&lt;span&gt; out_path.&lt;/span&gt;&lt;span&gt;exists&lt;/span&gt;&lt;span&gt;():&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;img &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; Image.&lt;/span&gt;&lt;span&gt;open&lt;/span&gt;&lt;span&gt;(out_path).&lt;/span&gt;&lt;span&gt;convert&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;&quot;RGB&quot;&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;flat &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; np.&lt;/span&gt;&lt;span&gt;array&lt;/span&gt;&lt;span&gt;(img).&lt;/span&gt;&lt;span&gt;reshape&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;-&lt;/span&gt;&lt;span&gt;1&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;slots &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;_read_slots_from_flat&lt;/span&gt;&lt;span&gt;(flat)   &lt;/span&gt;&lt;span&gt;# 读出旧槽位&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;5&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;slots.&lt;/span&gt;&lt;span&gt;extend&lt;/span&gt;&lt;span&gt;(new_slots)               &lt;/span&gt;&lt;span&gt;# 追加&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;6&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;payload &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;build_payload&lt;/span&gt;&lt;span&gt;(slots)        &lt;/span&gt;&lt;span&gt;# 整体重建&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;注意这里读的是 &lt;code&gt;out_path&lt;/code&gt;（输出文件）而不是 &lt;code&gt;carrier_path&lt;/code&gt;。&lt;strong&gt;也就是说 &lt;code&gt;-a&lt;/code&gt; 模式下 &lt;code&gt;-c&lt;/code&gt; 参数虽然被 argparse 标记为 required，但实际上被完全忽略。&lt;/strong&gt; 这是一个容易踩的坑：你以为在往 &lt;code&gt;cover.png&lt;/code&gt; 里加，实际上在往 &lt;code&gt;-o&lt;/code&gt; 指向的旧密图里加。&lt;/p&gt;&lt;hr /&gt;&lt;/section&gt;
+&lt;section&gt;&lt;h2&gt;8. 诱饵机制：合理推诿的愿望与现实&lt;a href=&quot;#8-诱饵机制合理推诿的愿望与现实&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;&lt;section&gt;&lt;h3&gt;设计意图&lt;a href=&quot;#设计意图&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;错误密钥 → 解出 a.txt，内容&quot;这是棍母&quot;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;DECOY_NAME&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;/span&gt;&lt;span&gt;&quot;a.txt&quot;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;DECOY_TEXT&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;/span&gt;&lt;span&gt;&quot;这是棍母&quot;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;def&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;_write_decoy&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;outdir&lt;/span&gt;&lt;span&gt;):&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;5&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;decoy.&lt;/span&gt;&lt;span&gt;write_text&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;DECOY_TEXT&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;encoding&lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt;&quot;utf-8&quot;&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;这是密码学里的&lt;strong&gt;合理推诿（plausible deniability）&lt;/strong&gt;思路：如果被胁迫交出密钥，交一个错的，对方拿到的是”看起来像正常内容”的假文件，从而认为”这张图里就只有这个”。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;但它在这个实现里不成立&lt;a href=&quot;#但它在这个实现里不成立&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;有四个层面的问题，按严重程度排列：&lt;/p&gt;&lt;p&gt;&lt;strong&gt;（1）诱饵是确定性的，且内容已知。&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;不管什么密钥、什么文件，错误密钥永远产出同一个 &lt;code&gt;a.txt&lt;/code&gt;，内容永远是”这是棍母”。胁迫者只要知道这个工具（而工具本身是公开的），看到”这是棍母”四个字，立刻就知道你交了假密钥。真正的合理推诿要求&lt;strong&gt;假内容和真内容在形式上不可区分&lt;/strong&gt;——比如假文件应该是同类型的、看起来合理的文档。&lt;/p&gt;&lt;p&gt;&lt;strong&gt;（2）槽位数量是明文。&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;code&gt;payload[5:7]&lt;/code&gt; 就是槽位数，&lt;code&gt;slot[64:72]&lt;/code&gt; 就是每个槽位的密文长度。&lt;strong&gt;不需要任何密钥&lt;/strong&gt;，&lt;code&gt;steg.py info&lt;/code&gt; 就能打印：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;[LSB] 槽位数量：2&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;  &lt;/span&gt;&lt;/span&gt;&lt;span&gt;槽位 1: 密文 32 字节, HMAC 指纹 9c01369e…&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;  &lt;/span&gt;&lt;/span&gt;&lt;span&gt;槽位 2: 密文 2010 字节, HMAC 指纹 afdfbbf1…&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;胁迫者一眼看到”2 个槽位”，而你只交出一个文件，推诿立刻破产。&lt;/p&gt;&lt;p&gt;&lt;strong&gt;（3）审计工具本身就是反证。&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;code&gt;steg-audit.py&lt;/code&gt; 的存在、它的 &lt;code&gt;--brute&lt;/code&gt; 选项、它 epilog 里那句”想穷举得动，可把 KDF_ITERS 同时降到 1000”——这些都在告诉任何拿到工具的人：&lt;strong&gt;这张图里的东西是可以被枚举的，而诱饵是一个已知的固定答案。&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;strong&gt;（4）提取失败和密钥错误无法区分。&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;code&gt;do_extract&lt;/code&gt; 在没有任何槽位命中时直接写诱饵，返回 &lt;code&gt;False&lt;/code&gt;；文件根本不是隐写图时也是写诱饵、返回 &lt;code&gt;False&lt;/code&gt;。也就是说”这图里没东西”和”你密钥错了”给出完全相同的输出。从可用性角度这算一致，从安全性角度它抹掉了唯一的信号。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;结论&lt;a href=&quot;#结论&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;诱饵机制在这个实现里的实际作用是&lt;strong&gt;降低误操作的挫败感&lt;/strong&gt;（输错密钥时给个明确提示，而不是一堆 traceback），而不是提供密码学意义上的否认能力。要真的做推诿，至少需要：槽位数隐藏或填充到固定值、诱饵内容随机化且与真实载荷同构、每个密钥都能解出”合理”的内容。&lt;/p&gt;&lt;hr /&gt;&lt;/section&gt;&lt;/section&gt;
+&lt;section&gt;&lt;h2&gt;9. 审计工具：攻击侧的成本模型&lt;a href=&quot;#9-审计工具攻击侧的成本模型&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;&lt;code&gt;steg-audit.py&lt;/code&gt; 是这个项目里技术含量最高的部分，因为它把”破解成本”做成了可量化的东西。&lt;/p&gt;&lt;section&gt;&lt;h3&gt;三级策略&lt;a href=&quot;#三级策略&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;是&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;否&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;读取槽位&lt;br /&gt;&lt;br /&gt;LSB / append / auto&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;阶段1：字典&lt;br /&gt;&lt;br /&gt;-k 用户提供&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;阶段2：自动候选&lt;br /&gt;&lt;br /&gt;--auto 文件名+弱密钥&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;所有槽位都命中？&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;跳过穷举&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;阶段3：穷举&lt;br /&gt;&lt;br /&gt;--brute 多线程&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;导出 -d&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;
+&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;是&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;否&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;读取槽位&lt;br /&gt;&lt;br /&gt;LSB / append / auto&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;阶段1：字典&lt;br /&gt;&lt;br /&gt;-k 用户提供&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;阶段2：自动候选&lt;br /&gt;&lt;br /&gt;--auto 文件名+弱密钥&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;所有槽位都命中？&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;跳过穷举&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;阶段3：穷举&lt;br /&gt;&lt;br /&gt;--brute 多线程&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;p&gt;导出 -d&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;阶段 2 的自动候选&lt;/strong&gt;很有意思，它模拟的是人的命名习惯：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;keys &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; [p.stem, p.parent.name]          &lt;/span&gt;&lt;/span&gt;&lt;span&gt;# 图片自己的文件名、目录名&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;for&lt;/span&gt;&lt;span&gt; sibling &lt;/span&gt;&lt;span&gt;in&lt;/span&gt;&lt;span&gt;&lt;span&gt; p.parent.&lt;/span&gt;&lt;span&gt;iterdir&lt;/span&gt;&lt;span&gt;():      &lt;/span&gt;&lt;/span&gt;&lt;span&gt;# 同目录其它文件的名字&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;keys.&lt;/span&gt;&lt;span&gt;append&lt;/span&gt;&lt;span&gt;(sibling.stem)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;keys.&lt;/span&gt;&lt;span&gt;extend&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;AUTO_COMMON_KEYS&lt;/span&gt;&lt;span&gt;)           &lt;/span&gt;&lt;/span&gt;&lt;span&gt;# 内置弱密钥表&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;AUTO_COMMON_KEYS&lt;/code&gt; 里有 &lt;code&gt;hyw&lt;/code&gt;、&lt;code&gt;pic&lt;/code&gt;、&lt;code&gt;sign&lt;/code&gt;、&lt;code&gt;steg&lt;/code&gt; 这类词——从 &lt;code&gt;hyw&lt;/code&gt; 这个明显是人名缩写的词来看，这是针对特定使用场景调过的。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;阶段 3 的工程细节&lt;a href=&quot;#阶段-3-的工程细节&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;（a）命中即剔除，越跑越快&lt;/strong&gt;&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;local_remaining &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; [(j, s) &lt;/span&gt;&lt;/span&gt;&lt;span&gt;for&lt;/span&gt;&lt;span&gt; j, s &lt;/span&gt;&lt;span&gt;in&lt;/span&gt;&lt;span&gt; local_remaining &lt;/span&gt;&lt;span&gt;if&lt;/span&gt;&lt;span&gt;&lt;span&gt; j &lt;/span&gt;&lt;span&gt;!=&lt;/span&gt;&lt;span&gt; i]&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;一个候选密钥命中某个槽位后，该槽位从待试列表移除。所以越往后，每个候选要做的 PBKDF2 次数越少。这个优化在多槽位场景下收益明显。&lt;/p&gt;&lt;p&gt;&lt;strong&gt;（b）进度条带 ETA&lt;/strong&gt;&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;rate &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; tried &lt;/span&gt;&lt;span&gt;/&lt;/span&gt;&lt;span&gt; elapsed &lt;/span&gt;&lt;/span&gt;&lt;span&gt;if&lt;/span&gt;&lt;span&gt;&lt;span&gt; elapsed &lt;/span&gt;&lt;span&gt;&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;/span&gt;&lt;span&gt;0&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;else&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;0.0&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;remaining &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; (total &lt;/span&gt;&lt;span&gt;-&lt;/span&gt;&lt;span&gt; tried) &lt;/span&gt;&lt;span&gt;/&lt;/span&gt;&lt;span&gt; rate&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;用实测速率外推剩余时间，比按理论速率算更准（因为多线程争抢、系统负载都会影响）。&lt;/p&gt;&lt;p&gt;&lt;strong&gt;（c）候选数超过 20 万时强制 5 秒冷静期&lt;/strong&gt;&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;if&lt;/span&gt;&lt;span&gt;&lt;span&gt; total &lt;/span&gt;&lt;span&gt;&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;/span&gt;&lt;span&gt;200_000&lt;/span&gt;&lt;span&gt;:&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;print&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;f&lt;/span&gt;&lt;span&gt;&quot;警告：总候选数 &lt;/span&gt;&lt;span&gt;{&lt;/span&gt;&lt;span&gt;total&lt;/span&gt;&lt;span&gt;}&lt;/span&gt;&lt;span&gt;，在 100k 迭代下可能需要很久（数小时到数天）。&quot;&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;print&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;&quot;继续请在 5 秒内按 Ctrl+C 取消…&quot;&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;time.&lt;/span&gt;&lt;span&gt;sleep&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;5&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;这是个很务实的防呆设计——避免用户一个手滑按回车，然后机器跑三天。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;成本模型（实测数据）&lt;a href=&quot;#成本模型实测数据&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;关键前提：&lt;strong&gt;每个候选 × 每个未命中槽位 = 一次 34.5ms 的 PBKDF2&lt;/strong&gt;。&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;场景&lt;/th&gt;&lt;th&gt;候选数&lt;/th&gt;&lt;th&gt;单线程耗时&lt;/th&gt;&lt;th&gt;4 线程耗时&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;digits 1~4&lt;/td&gt;&lt;td&gt;11,110&lt;/td&gt;&lt;td&gt;≈ 6.4 分钟&lt;/td&gt;&lt;td&gt;≈ 1.6 分钟&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;digits 1~5&lt;/td&gt;&lt;td&gt;111,110&lt;/td&gt;&lt;td&gt;≈ 1.1 小时&lt;/td&gt;&lt;td&gt;≈ 16 分钟&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;digits 1~6&lt;/td&gt;&lt;td&gt;1,111,110&lt;/td&gt;&lt;td&gt;≈ 10.6 小时&lt;/td&gt;&lt;td&gt;≈ 2.7 小时&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;lower 1~4&lt;/td&gt;&lt;td&gt;475,254&lt;/td&gt;&lt;td&gt;≈ 4.5 小时&lt;/td&gt;&lt;td&gt;≈ 1.1 小时&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;lower 1~5&lt;/td&gt;&lt;td&gt;12,356,630&lt;/td&gt;&lt;td&gt;≈ 118 小时&lt;/td&gt;&lt;td&gt;≈ 30 小时&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;alnum 1~4&lt;/td&gt;&lt;td&gt;15,018,570&lt;/td&gt;&lt;td&gt;≈ 144 小时&lt;/td&gt;&lt;td&gt;≈ 36 小时&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;alnum 1~6&lt;/td&gt;&lt;td&gt;57,731,386,986&lt;/td&gt;&lt;td&gt;≈ 55 年&lt;/td&gt;&lt;td&gt;≈ 14 年&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;p&gt;结论非常清晰：&lt;strong&gt;KDF 的 10 万次迭代，把可穷举空间压到了”纯数字 5~6 位”这个量级。&lt;/strong&gt; 一个 6 位以上的字母数字密钥，在当前实现下已经是不可穷举的。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;但多线程实现有个真实的坑（实测）&lt;a href=&quot;#但多线程实现有个真实的坑实测&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;我用 2 槽位、110 个候选、&lt;code&gt;-j 4&lt;/code&gt; 跑：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;共尝试：110 个候选&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;总用时：6s&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;平均速率：17.71/s&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;110 个候选 × 2 槽位 = 220 次 PBKDF2，6 秒完成，即 36.7 次 KDF/秒。而单线程单槽位实测是 29 次/秒。&lt;strong&gt;4 个线程只换来了 1.27 倍加速。&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;原因在分块粒度：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;BATCH&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;/span&gt;&lt;span&gt;200&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;if&lt;/span&gt;&lt;span&gt;&lt;span&gt; jobs &lt;/span&gt;&lt;span&gt;&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;/span&gt;&lt;span&gt;1&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;else&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;50&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;...&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;for&lt;/span&gt;&lt;span&gt; local_tried, local_hits &lt;/span&gt;&lt;span&gt;in&lt;/span&gt;&lt;span&gt;&lt;span&gt; ex.&lt;/span&gt;&lt;span&gt;map&lt;/span&gt;&lt;span&gt;(process_batch, &lt;/span&gt;&lt;span&gt;chunks&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;gen_candidates&lt;/span&gt;&lt;span&gt;(), &lt;/span&gt;&lt;span&gt;BATCH&lt;/span&gt;&lt;span&gt;)):&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;候选被切成&lt;strong&gt;每块 200 个&lt;/strong&gt;再分发给线程。110 个候选只切出 1 块，&lt;strong&gt;只有 1 个线程在干活&lt;/strong&gt;，另外 3 个全程空转。&lt;/p&gt;&lt;p&gt;即使候选数足够多，200 这个粒度也意味着：负载不均衡时（比如某些块恰好包含全部命中，提前退出），尾部的慢线程会成为瓶颈。更合理的做法是把 &lt;code&gt;BATCH&lt;/code&gt; 降到 10~20，或者用 &lt;code&gt;ex.submit&lt;/code&gt; 动态派发。&lt;/p&gt;&lt;p&gt;另外 &lt;code&gt;gen_candidates()&lt;/code&gt; 是&lt;strong&gt;按长度递增&lt;/strong&gt;生成（先 1 位，再 2 位……），所以第一个 chunk 全是短密钥、最后一个 chunk 全是长密钥。如果用户的密钥偏短，命中会集中在早期 chunk，后面的线程在解已经解开的槽位——虽然 &lt;code&gt;local_remaining&lt;/code&gt; 会剔除，但每个线程拿的是自己的副本，跨线程不共享，所以&lt;strong&gt;已经在别的线程命中的槽位，在这个线程里还会被重复尝试&lt;/strong&gt;。这是一个可以优化的点（用一个共享的 &lt;code&gt;threading.Event&lt;/code&gt; 或带锁的集合）。&lt;/p&gt;&lt;hr /&gt;&lt;/section&gt;&lt;/section&gt;
+&lt;section&gt;&lt;h2&gt;10. img-split：无损流水线，和它的语义陷阱&lt;a href=&quot;#10-img-split无损流水线和它的语义陷阱&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;&lt;section&gt;&lt;h3&gt;核心不变量&lt;a href=&quot;#核心不变量&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;原图 = 切块1 ⊕ 切块2 ⊕ … ⊕ 切块n&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;只要”切”和”合”都是纯像素操作（&lt;code&gt;crop&lt;/code&gt; + &lt;code&gt;paste&lt;/code&gt;），且落盘格式无损，这个等式就严格成立。所以：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;tile &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; img.&lt;/span&gt;&lt;span&gt;crop&lt;/span&gt;&lt;span&gt;((x0, y0, x1, y1))     &lt;/span&gt;&lt;/span&gt;&lt;span&gt;# 切&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;canvas.&lt;/span&gt;&lt;span&gt;paste&lt;/span&gt;&lt;span&gt;(tile, (p[&lt;/span&gt;&lt;/span&gt;&lt;span&gt;&quot;x0&quot;&lt;/span&gt;&lt;span&gt;], p[&lt;/span&gt;&lt;span&gt;&quot;y0&quot;&lt;/span&gt;&lt;span&gt;]))  &lt;/span&gt;&lt;span&gt;# 合&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;都是零损失操作。真正的风险只在&lt;strong&gt;编码&lt;/strong&gt;环节，所以代码对格式做了硬约束：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;lossless &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; fmt &lt;/span&gt;&lt;/span&gt;&lt;span&gt;in&lt;/span&gt;&lt;span&gt; (&lt;/span&gt;&lt;span&gt;&quot;png&quot;&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;&quot;bmp&quot;&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;&quot;tif&quot;&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;&quot;tiff&quot;&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;&quot;webp&quot;&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;if&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;not&lt;/span&gt;&lt;span&gt; lossless &lt;/span&gt;&lt;span&gt;and&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;not&lt;/span&gt;&lt;span&gt; args.force:&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;print&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;&quot;警告：输出格式为有损格式，合并后无法保证像素级还原。&quot;&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;file&lt;/span&gt;&lt;span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt;sys.stderr)&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;sys.&lt;/span&gt;&lt;span&gt;exit&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;2&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;实测用 JPEG 输入、默认格式（跟随输入 = jpg）会被直接拦下：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;警告：输出格式为有损格式，合并后无法保证像素级还原。&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;     &lt;/span&gt;&lt;/span&gt;&lt;span&gt;想无损请用 -f png，或用 --force 强制继续。&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;这是个好设计——&lt;strong&gt;默认拒绝危险操作，而不是默认放行&lt;/strong&gt;。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;比例切分的取整逻辑&lt;a href=&quot;#比例切分的取整逻辑&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;def&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;split_positions&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;total&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;ratios&lt;/span&gt;&lt;/span&gt;&lt;span&gt;):&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;s &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;sum&lt;/span&gt;&lt;span&gt;(ratios)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;acc &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;0.0&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;cuts &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; []&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;5&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;for&lt;/span&gt;&lt;span&gt; r &lt;/span&gt;&lt;span&gt;in&lt;/span&gt;&lt;span&gt; ratios:&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;6&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;        &lt;/span&gt;&lt;/span&gt;&lt;span&gt;acc &lt;/span&gt;&lt;span&gt;+=&lt;/span&gt;&lt;span&gt; r&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;7&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;        &lt;/span&gt;&lt;/span&gt;&lt;span&gt;cuts.&lt;/span&gt;&lt;span&gt;append&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;int&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;round&lt;/span&gt;&lt;span&gt;&lt;span&gt;(total &lt;/span&gt;&lt;span&gt;*&lt;/span&gt;&lt;span&gt; acc &lt;/span&gt;&lt;span&gt;/&lt;/span&gt;&lt;span&gt; s)))   &lt;/span&gt;&lt;/span&gt;&lt;span&gt;# 累积比例再取整&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;8&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;cuts[&lt;/span&gt;&lt;span&gt;-&lt;/span&gt;&lt;span&gt;1&lt;/span&gt;&lt;span&gt;&lt;span&gt;] &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; total                                &lt;/span&gt;&lt;/span&gt;&lt;span&gt;# 最后一段强制对齐到边界&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;9&lt;/div&gt;&lt;/div&gt;&lt;div&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;10&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;fixed, prev &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; [], &lt;/span&gt;&lt;span&gt;0&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;11&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;for&lt;/span&gt;&lt;span&gt; i, e &lt;/span&gt;&lt;span&gt;in&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;enumerate&lt;/span&gt;&lt;span&gt;(cuts):&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;12&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;        &lt;/span&gt;&lt;span&gt;if&lt;/span&gt;&lt;span&gt;&lt;span&gt; e &lt;/span&gt;&lt;span&gt;&amp;lt;=&lt;/span&gt;&lt;span&gt; prev:&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;13&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;            &lt;/span&gt;&lt;/span&gt;&lt;span&gt;e &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;min&lt;/span&gt;&lt;span&gt;&lt;span&gt;(prev &lt;/span&gt;&lt;span&gt;+&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;/span&gt;&lt;span&gt;1&lt;/span&gt;&lt;span&gt;, total)                &lt;/span&gt;&lt;span&gt;# 防止零宽&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;14&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;        &lt;/span&gt;&lt;/span&gt;&lt;span&gt;fixed.&lt;/span&gt;&lt;span&gt;append&lt;/span&gt;&lt;span&gt;((prev, e))&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;15&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;        &lt;/span&gt;&lt;/span&gt;&lt;span&gt;prev &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; e&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;16&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;if&lt;/span&gt;&lt;span&gt; fixed:&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;17&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;        &lt;/span&gt;&lt;/span&gt;&lt;span&gt;fixed[&lt;/span&gt;&lt;span&gt;-&lt;/span&gt;&lt;span&gt;1&lt;/span&gt;&lt;span&gt;&lt;span&gt;] &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; (fixed[&lt;/span&gt;&lt;span&gt;-&lt;/span&gt;&lt;/span&gt;&lt;span&gt;1&lt;/span&gt;&lt;span&gt;][&lt;/span&gt;&lt;span&gt;0&lt;/span&gt;&lt;span&gt;], total)           &lt;/span&gt;&lt;span&gt;# 再次对齐&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;18&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;return&lt;/span&gt;&lt;span&gt; fixed&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;span&gt;展开&lt;/span&gt;&lt;span&gt;收起&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;p&gt;用&lt;strong&gt;累积比例&lt;/strong&gt;而不是逐段独立取整，是为了避免误差累积。比如 400 按 1:2&amp;lt;1&amp;gt;：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;cuts = [round(400*1/4), round(400*3/4), round(400*4/4)] = [100, 300, 400]&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;→ [(0,100), (100,300), (300,400)]&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;完美，无重叠无空洞。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;但边界会崩（实测）&lt;a href=&quot;#但边界会崩实测&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;当切块数多于像素数时，&lt;code&gt;min(prev + 1, total)&lt;/code&gt; 会产出零宽区间：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;total=2 ratios=[1,1,1,1] -&amp;gt; [(0,1), (1,2), (2,2), (2,2)]&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;total=7 ratios=[1]*10    -&amp;gt; [(0,1), ..., (6,7), (7,7), (7,7), (7,7)]&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;零宽 &lt;code&gt;crop&lt;/code&gt; 出来的图，Pillow 保存时直接炸：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;SystemError: tile cannot extend outside image&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;实测在 2×8 的图上用 &lt;code&gt;-r 1:1:1:1&lt;/code&gt; 复现了。这不算严重 bug（正常用户不会把图切成比像素还多的块），但错误信息完全没提示真正原因，属于可以一行修掉的问题：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;if&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;len&lt;/span&gt;&lt;span&gt;&lt;span&gt;(ratios) &lt;/span&gt;&lt;span&gt;&amp;gt;&lt;/span&gt;&lt;span&gt; total:&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;sys.&lt;/span&gt;&lt;span&gt;exit&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;f&lt;/span&gt;&lt;span&gt;&quot;切块数 &lt;/span&gt;&lt;span&gt;{&lt;/span&gt;&lt;span&gt;len&lt;/span&gt;&lt;span&gt;(ratios)&lt;/span&gt;&lt;span&gt;}&lt;/span&gt;&lt;span&gt; 超过该维度像素数 &lt;/span&gt;&lt;span&gt;{&lt;/span&gt;&lt;span&gt;total&lt;/span&gt;&lt;span&gt;}&lt;/span&gt;&lt;span&gt;&quot;&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;manifest.json：把”怎么切的”变成可验证的契约&lt;a href=&quot;#manifestjson把怎么切的变成可验证的契约&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;{&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;  &lt;/span&gt;&lt;span&gt;&quot;source&quot;&lt;/span&gt;&lt;span&gt;: &lt;/span&gt;&lt;span&gt;&quot;...&quot;&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;&quot;width&quot;&lt;/span&gt;&lt;span&gt;: &lt;/span&gt;&lt;span&gt;400&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;&quot;height&quot;&lt;/span&gt;&lt;span&gt;: &lt;/span&gt;&lt;span&gt;300&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;&quot;mode&quot;&lt;/span&gt;&lt;span&gt;: &lt;/span&gt;&lt;span&gt;&quot;RGB&quot;&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;  &lt;/span&gt;&lt;span&gt;&quot;direction&quot;&lt;/span&gt;&lt;span&gt;: &lt;/span&gt;&lt;span&gt;&quot;h&quot;&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;&quot;h_ratios&quot;&lt;/span&gt;&lt;span&gt;: [&lt;/span&gt;&lt;span&gt;1&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span&gt;2&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span&gt;1&lt;/span&gt;&lt;span&gt;], &lt;/span&gt;&lt;span&gt;&quot;v_ratios&quot;&lt;/span&gt;&lt;span&gt;: &lt;/span&gt;&lt;span&gt;null&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;  &lt;/span&gt;&lt;span&gt;&quot;n_cols&quot;&lt;/span&gt;&lt;span&gt;: &lt;/span&gt;&lt;span&gt;3&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;&quot;n_rows&quot;&lt;/span&gt;&lt;span&gt;: &lt;/span&gt;&lt;span&gt;1&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;&quot;format&quot;&lt;/span&gt;&lt;span&gt;: &lt;/span&gt;&lt;span&gt;&quot;png&quot;&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;&quot;lossless&quot;&lt;/span&gt;&lt;span&gt;: &lt;/span&gt;&lt;span&gt;true&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;5&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;  &lt;/span&gt;&lt;span&gt;&quot;source_sha256&quot;&lt;/span&gt;&lt;span&gt;: &lt;/span&gt;&lt;span&gt;&quot;...&quot;&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;6&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;  &lt;/span&gt;&lt;span&gt;&quot;parts&quot;&lt;/span&gt;&lt;span&gt;: [{&lt;/span&gt;&lt;span&gt;&quot;name&quot;&lt;/span&gt;&lt;span&gt;:&lt;/span&gt;&lt;span&gt;&quot;...&quot;&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span&gt;&quot;row&quot;&lt;/span&gt;&lt;span&gt;:&lt;/span&gt;&lt;span&gt;0&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span&gt;&quot;col&quot;&lt;/span&gt;&lt;span&gt;:&lt;/span&gt;&lt;span&gt;0&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span&gt;&quot;x0&quot;&lt;/span&gt;&lt;span&gt;:&lt;/span&gt;&lt;span&gt;0&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span&gt;&quot;y0&quot;&lt;/span&gt;&lt;span&gt;:&lt;/span&gt;&lt;span&gt;0&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span&gt;&quot;x1&quot;&lt;/span&gt;&lt;span&gt;:&lt;/span&gt;&lt;span&gt;100&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span&gt;&quot;y1&quot;&lt;/span&gt;&lt;span&gt;:&lt;/span&gt;&lt;span&gt;300&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span&gt;&quot;w&quot;&lt;/span&gt;&lt;span&gt;:&lt;/span&gt;&lt;span&gt;100&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span&gt;&quot;h&quot;&lt;/span&gt;&lt;span&gt;:&lt;/span&gt;&lt;span&gt;300&lt;/span&gt;&lt;span&gt;}, &lt;/span&gt;&lt;span&gt;...&lt;/span&gt;&lt;span&gt;]&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;7&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;}&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;关键是&lt;strong&gt;每块都记录了自己的绝对坐标&lt;/strong&gt;（&lt;code&gt;x0,y0,x1,y1&lt;/code&gt;），而不只是行列号。这让合并端不需要重新计算切分逻辑——即使将来切分算法改了，老 manifest 依然能正确合并。这是个很成熟的格式设计。&lt;/p&gt;&lt;p&gt;&lt;code&gt;mode&lt;/code&gt; 也被记录了，合并时会用它重建画布：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;mode &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; manifest[&lt;/span&gt;&lt;/span&gt;&lt;span&gt;&quot;mode&quot;&lt;/span&gt;&lt;span&gt;]&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;if&lt;/span&gt;&lt;span&gt; mode &lt;/span&gt;&lt;span&gt;not&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;in&lt;/span&gt;&lt;span&gt; (&lt;/span&gt;&lt;span&gt;&quot;RGB&quot;&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;&quot;RGBA&quot;&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;&quot;L&quot;&lt;/span&gt;&lt;span&gt;):&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;mode &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;&quot;RGB&quot;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;因为 &lt;code&gt;split&lt;/code&gt; 时把 &lt;code&gt;P&lt;/code&gt;（调色板）等模式统一转成了 RGB，所以这里要做回退。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;语义陷阱：&lt;code&gt;--verify&lt;/code&gt; 比的是文件，不是像素（实测）&lt;a href=&quot;#语义陷阱--verify-比的是文件不是像素实测&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;if&lt;/span&gt;&lt;span&gt; args.verify:&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;a &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;sha256_file&lt;/span&gt;&lt;span&gt;(args.verify)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;b &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;sha256_file&lt;/span&gt;&lt;span&gt;(out_path)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;if&lt;/span&gt;&lt;span&gt;&lt;span&gt; a &lt;/span&gt;&lt;span&gt;==&lt;/span&gt;&lt;span&gt; b:&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;5&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;        &lt;/span&gt;&lt;span&gt;print&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;&quot;一致 ✓  （像素级无损）&quot;&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;sha256_file&lt;/code&gt; 哈希的是&lt;strong&gt;整个文件的字节&lt;/strong&gt;，而打印的结论是”&lt;strong&gt;像素级&lt;/strong&gt;无损”。这两件事在输入是 PNG 时恰好等价，但在输入是 JPEG 时完全不等价。&lt;/p&gt;&lt;p&gt;实测：把 &lt;code&gt;cover.jpg&lt;/code&gt; 切成两半再合回 PNG，然后 &lt;code&gt;--verify cover.jpg&lt;/code&gt;：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;原始 SHA256：b2b478f4...&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;合并 SHA256：c6d3b7c5...&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;不一致 ✗  （可能有损压缩或尺寸变化）&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;退出码: 3&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;但用 NumPy 逐像素比对：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;像素数组完全相同: True&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;像素数据 SHA256 相同: True&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;像素完全一致，工具却报”不一致”并返回退出码 3。&lt;/strong&gt; 原因很简单：&lt;code&gt;cover.jpg&lt;/code&gt; 是 JPEG 容器，&lt;code&gt;merged.png&lt;/code&gt; 是 PNG 容器，两个文件的字节流当然不同，尽管解码出的像素一模一样。&lt;/p&gt;&lt;p&gt;这是个会误导人的假阴性。正确做法是比较&lt;strong&gt;像素数据的哈希&lt;/strong&gt;：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;def&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;pixel_sha256&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;path&lt;/span&gt;&lt;span&gt;):&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;    &lt;/span&gt;&lt;/span&gt;&lt;span&gt;img &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; Image.&lt;/span&gt;&lt;span&gt;open&lt;/span&gt;&lt;span&gt;(path).&lt;/span&gt;&lt;span&gt;convert&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span&gt;&quot;RGBA&quot;&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;return&lt;/span&gt;&lt;span&gt;&lt;span&gt; hashlib.&lt;/span&gt;&lt;span&gt;sha256&lt;/span&gt;&lt;span&gt;(img.&lt;/span&gt;&lt;span&gt;tobytes&lt;/span&gt;&lt;span&gt;()).&lt;/span&gt;&lt;span&gt;hexdigest&lt;/span&gt;&lt;span&gt;()&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;这个 bug 在自动化脚本里尤其危险——退出码 3 会被当成”合图失败”，而实际上完全成功。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;与 steg 的联动&lt;a href=&quot;#与-steg-的联动&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;文档说”含密图切片后再合并，仍可正常提取”。实测验证：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;split 1:2:1 → 三块 → merge → SHA256 与原图一致 ✓&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;因为切合是纯像素搬运，LSB 载荷原样保留。&lt;strong&gt;但有个前提&lt;/strong&gt;：分块必须存成无损格式。如果任何一块被存成 JPEG，那块区域的 LSB 全毁，合并后的图整段提取都会失败。所以 &lt;code&gt;-f png&lt;/code&gt; 在这条流水线上不是建议，是必需。&lt;/p&gt;&lt;hr /&gt;&lt;/section&gt;&lt;/section&gt;
+&lt;section&gt;&lt;h2&gt;11. 实测数据总表&lt;a href=&quot;#11-实测数据总表&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;项目&lt;/th&gt;&lt;th&gt;数值&lt;/th&gt;&lt;th&gt;说明&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;400×300 RGB 的 LSB 容量&lt;/td&gt;&lt;td&gt;45,000 字节&lt;/td&gt;&lt;td&gt;W·H·C/8&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;20 字节文件的占用&lt;/td&gt;&lt;td&gt;111 字节 / 888 bit&lt;/td&gt;&lt;td&gt;79 字节固定开销 + 32 字节密文&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;PSNR（888 bit 载荷）&lt;/td&gt;&lt;td&gt;77.29 dB&lt;/td&gt;&lt;td&gt;最大像素差 1&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;被改动通道占比&lt;/td&gt;&lt;td&gt;0.12%&lt;/td&gt;&lt;td&gt;载荷极小时的实测值&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;KDF 100k 单次&lt;/td&gt;&lt;td&gt;34.5 ms&lt;/td&gt;&lt;td&gt;单线程 ≈ 29 次/秒&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;KDF 1k 单次&lt;/td&gt;&lt;td&gt;0.4 ms&lt;/td&gt;&lt;td&gt;单线程 ≈ 2590 次/秒&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;2 槽位 × 110 候选 × 4 线程&lt;/td&gt;&lt;td&gt;6 秒，17.7 候选/秒&lt;/td&gt;&lt;td&gt;实际只用了 1 个线程&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;JPEG 9KB → PNG&lt;/td&gt;&lt;td&gt;67 KB&lt;/td&gt;&lt;td&gt;7.5 倍膨胀&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;LSB 20KB → PNG 增量&lt;/td&gt;&lt;td&gt;+26,696 字节&lt;/td&gt;&lt;td&gt;载荷的 1.30 倍&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;append 20KB → 增量&lt;/td&gt;&lt;td&gt;+20,584 字节&lt;/td&gt;&lt;td&gt;≈ 载荷 + 头部&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;append 尾部明文&lt;/td&gt;&lt;td&gt;&lt;code&gt;STEG...STEGv4ND&lt;/code&gt;&lt;/td&gt;&lt;td&gt;IEND 后 127 字节&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;一次 JPEG 重编码&lt;/td&gt;&lt;td&gt;LSB 载荷全毁&lt;/td&gt;&lt;td&gt;解出诱饵&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;JPEG 输入 + &lt;code&gt;--verify&lt;/code&gt;&lt;/td&gt;&lt;td&gt;退出码 3&lt;/td&gt;&lt;td&gt;像素一致但文件哈希不同&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;hr /&gt;&lt;/section&gt;
+&lt;section&gt;&lt;h2&gt;12. 已知问题清单&lt;a href=&quot;#12-已知问题清单&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;按影响面排序，全部经实测复现。&lt;/p&gt;&lt;section&gt;&lt;h3&gt;高：&lt;code&gt;auto&lt;/code&gt; 提取不会回退到第二个通道&lt;a href=&quot;#高auto-提取不会回退到第二个通道&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;for&lt;/span&gt;&lt;span&gt; fn &lt;/span&gt;&lt;span&gt;in&lt;/span&gt;&lt;span&gt; (extract_lsb, extract_append):&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;try&lt;/span&gt;&lt;span&gt;:&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;&lt;span&gt;        &lt;/span&gt;&lt;/span&gt;&lt;span&gt;slots &lt;/span&gt;&lt;span&gt;=&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;fn&lt;/span&gt;&lt;span&gt;(input_path)&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;except&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;Exception&lt;/span&gt;&lt;span&gt;:&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;5&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;        &lt;/span&gt;&lt;span&gt;continue&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;6&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;    &lt;/span&gt;&lt;span&gt;return&lt;/span&gt;&lt;span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;_try_extract&lt;/span&gt;&lt;span&gt;(slots, outdir, signature)   &lt;/span&gt;&lt;/span&gt;&lt;span&gt;# 一旦解析成功就 return&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;只要 LSB 层能被解析（哪怕密钥一个都没命中），就&lt;strong&gt;永远不会尝试 append 层&lt;/strong&gt;。&lt;/p&gt;&lt;p&gt;实测：先 LSB 藏 &lt;code&gt;k1&lt;/code&gt;，再在同一张图上 append 藏 &lt;code&gt;k2&lt;/code&gt;：&lt;/p&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;[用 k1 提取] 第 1/1 个槽位密钥匹配 ✓ → secret.txt&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;[用 k2 提取] 已解出：a.txt          ← 失败，应为 note 文件&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;&lt;p&gt;修法：把两个通道的槽位都读出来合并后再试，而不是二选一。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;高：&lt;code&gt;--verify&lt;/code&gt; 的文件哈希 vs 像素哈希（见 10.6）&lt;a href=&quot;#高--verify-的文件哈希-vs-像素哈希见-106&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;退出码 3 的语义是”合图有损”，但实际可能完全无损。自动化流水线会误判。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;中：&lt;code&gt;-a&lt;/code&gt; 模式下 &lt;code&gt;-c&lt;/code&gt; 参数被忽略&lt;a href=&quot;#中-a-模式下--c-参数被忽略&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;argparse 要求 &lt;code&gt;-c&lt;/code&gt; 必填，但 &lt;code&gt;add_slot&lt;/code&gt; 分支里读的是 &lt;code&gt;out_path&lt;/code&gt;。用户以为在改 &lt;code&gt;cover.png&lt;/code&gt;，实际在改 &lt;code&gt;-o&lt;/code&gt;。应该改成 &lt;code&gt;-a&lt;/code&gt; 时 &lt;code&gt;-c&lt;/code&gt; 非必需，或显式提示”忽略 -c”。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;中：诱饵机制不具备否认能力（见第 8 节）&lt;a href=&quot;#中诱饵机制不具备否认能力见第-8-节&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;槽位数和每槽长度明文，诱饵内容固定已知。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;中：多线程分块粒度过粗&lt;a href=&quot;#中多线程分块粒度过粗&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;&lt;code&gt;BATCH = 200&lt;/code&gt;，候选数少于 200 时只用 1 个线程。跨线程不共享已命中集合，导致重复劳动。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;低：零宽切块直接抛 &lt;code&gt;SystemError&lt;/code&gt;&lt;a href=&quot;#低零宽切块直接抛-systemerror&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;切块数 &amp;gt; 像素数时，错误信息完全不指向根因。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;低：密码学上密钥未做域分离（见 3.4）&lt;a href=&quot;#低密码学上密钥未做域分离见-34&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;当前无实际攻击，但属于设计债。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;低：&lt;code&gt;stream_xor&lt;/code&gt; 的 Python 循环&lt;a href=&quot;#低stream_xor-的-python-循环&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;每 32 字节一次 HMAC 调用，大文件时开销线性增长。可以用 &lt;code&gt;hashlib.shake&lt;/code&gt; 或直接 NumPy 批处理优化。&lt;/p&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;低：载荷不压缩&lt;a href=&quot;#低载荷不压缩&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;文件原样加密，文本类内容容量利用率很低。加一层 zlib（在加密前）能显著提升有效容量，代价是需要额外存原始长度。&lt;/p&gt;&lt;hr /&gt;&lt;/section&gt;&lt;/section&gt;
+&lt;section&gt;&lt;h2&gt;13. 如果要写 v5，我会怎么改&lt;a href=&quot;#13-如果要写-v5我会怎么改&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;格式层&lt;/strong&gt;&lt;/p&gt;&lt;ul&gt;
+&lt;li&gt;槽位头里去掉明文的 &lt;code&gt;ct_len&lt;/code&gt;，改成定长填充或让长度也成为加密内容的一部分——代价是提取端必须能确定槽位边界，可以靠”每个槽位固定上限 + 实际长度加密在密文头部”来实现。&lt;/li&gt;
+&lt;li&gt;槽位数量改为填充到固定值（比如总是 4 个），空槽位填随机字节，让”有几个文件”不可见。&lt;/li&gt;
+&lt;li&gt;加一个全局 payload 级的 MAC，防止槽位被整体截断。&lt;/li&gt;
+&lt;/ul&gt;&lt;p&gt;&lt;strong&gt;密码学层&lt;/strong&gt;&lt;/p&gt;&lt;ul&gt;
+&lt;li&gt;PBKDF2 输出 64 字节，前 32 做 enc_key，后 32 做 mac_key（或 HKDF 加标签）。&lt;/li&gt;
+&lt;li&gt;考虑 Argon2id 替代 PBKDF2——同样的时间成本下抗 GPU/ASIC 能力强得多。&lt;/li&gt;
+&lt;li&gt;每个槽位用独立的 nonce 已经做对了，保持。&lt;/li&gt;
+&lt;/ul&gt;&lt;p&gt;&lt;strong&gt;通道层&lt;/strong&gt;&lt;/p&gt;&lt;ul&gt;
+&lt;li&gt;LSB 增加”随机位置 + 密钥驱动”的散布策略，而不是从第 0 位连续写。当前实现把载荷全塞在图片开头几行，&lt;strong&gt;统计检测（卡方检验、RS 分析）一眼就能定位&lt;/strong&gt;。&lt;/li&gt;
+&lt;li&gt;考虑 DCT 域隐写（抗 JPEG）或调色板排序隐写，代价是实现复杂度大增。&lt;/li&gt;
+&lt;/ul&gt;&lt;p&gt;&lt;strong&gt;工具层&lt;/strong&gt;&lt;/p&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;auto&lt;/code&gt; 提取合并双通道。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;--verify&lt;/code&gt; 改比像素哈希。&lt;/li&gt;
+&lt;li&gt;穷举分块降到 20，共享命中集合。&lt;/li&gt;
+&lt;li&gt;诱饵内容改为”与真实载荷同类型”的随机生成内容。&lt;/li&gt;
+&lt;/ul&gt;&lt;hr /&gt;&lt;/section&gt;
+&lt;section&gt;&lt;h2&gt;14. 合规边界&lt;a href=&quot;#14-合规边界&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;这套工具的定位是&lt;strong&gt;隐写术的技术演示与教学&lt;/strong&gt;，代码里 &lt;code&gt;steg-audit.py&lt;/code&gt; 的 epilog 也明确写了”只用于合法用途”。&lt;/p&gt;&lt;p&gt;它适合的场景：CTF 题目、隐写检测算法研究、数字水印原型、数据泄露防护（DLP）的对抗测试、以及理解”加密不等于隐藏”这个安全概念。&lt;/p&gt;&lt;p&gt;需要明确的是：在多数司法辖区，&lt;strong&gt;用隐写术传递依法应当接受审查的内容、规避监管、或用于犯罪通信，本身可能构成违法&lt;/strong&gt;。工具的技术中立性不能替代使用者的法律责任。如果你在做安全研究，请在授权范围内、在隔离环境中进行。&lt;/p&gt;&lt;p&gt;从纯技术角度，这套实现最有价值的部分不是”藏得多好”，而是&lt;strong&gt;它把攻击成本量化了&lt;/strong&gt;——&lt;code&gt;steg-audit.py&lt;/code&gt; 让你能亲手算出”6 位数字密钥只要 10 小时”，从而明白为什么 KDF 迭代次数是这类系统唯一有效的防线。&lt;/p&gt;&lt;hr /&gt;&lt;/section&gt;
+&lt;section&gt;&lt;h2&gt;15. 命令速查&lt;a href=&quot;#15-命令速查&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;span&gt;&lt;/span&gt;&lt;span&gt;Terminal window&lt;/span&gt;&lt;span&gt;展开&lt;/span&gt;&lt;span&gt;收起&lt;/span&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;# ============ 嵌入 ============&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;# 单个文件，LSB 方式&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;python&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;steg.py&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;embed&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-c&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;cover.jpg&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-t&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;secret.txt:mykey&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-o&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;hidden.png&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;5&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;# 多文件多密钥，append 方式（容量无上限）&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;6&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;python&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;steg.py&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;embed&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-c&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;cover.png&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-t&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;a.txt:key_a&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;b.jpg:key_b&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-o&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;hidden.png&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-m&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;append&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;7&lt;/div&gt;&lt;/div&gt;&lt;div&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;8&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;# 在已有密图上追加槽位（注意：此时 -c 被忽略，实际改的是 -o 指向的文件）&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;9&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;python&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;steg.py&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;embed&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-c&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;ignored.png&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-t&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;new.txt:key_c&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-o&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;hidden.png&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-a&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;10&lt;/div&gt;&lt;/div&gt;&lt;div&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;11&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;# ============ 提取 ============&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;12&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;python&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;steg.py&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;extract&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-i&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;hidden.png&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-d&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;out&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-s&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;mykey&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;13&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;python&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;steg.py&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;extract&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-i&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;hidden.png&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-d&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;out&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-s&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;mykey&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-m&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;append&lt;/span&gt;&lt;span&gt;   &lt;/span&gt;&lt;span&gt;# 指定通道&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;14&lt;/div&gt;&lt;/div&gt;&lt;div&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;15&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;# 只看槽位，不要密钥&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;16&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;python&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;steg.py&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;info&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-i&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;hidden.png&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;17&lt;/div&gt;&lt;/div&gt;&lt;div&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;18&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;# ============ 审计 ============&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;19&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;python&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;steg-audit.py&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-i&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;hidden.png&lt;/span&gt;&lt;span&gt;                              &lt;/span&gt;&lt;span&gt;# 只看槽位&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;20&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;python&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;steg-audit.py&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-i&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;hidden.png&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-k&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;&quot;hyw,pic,wrong&quot;&lt;/span&gt;&lt;span&gt;           &lt;/span&gt;&lt;span&gt;# 字典&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;21&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;python&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;steg-audit.py&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-i&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;hidden.png&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-k&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;keys.txt&lt;/span&gt;&lt;span&gt;                  &lt;/span&gt;&lt;span&gt;# 从文件读&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;22&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;python&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;steg-audit.py&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-i&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;hidden.png&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;--auto&lt;/span&gt;&lt;span&gt;                       &lt;/span&gt;&lt;span&gt;# 文件名 + 弱密钥&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;23&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;python&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;steg-audit.py&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-i&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;hidden.png&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;--brute&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;digits&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;--brute-max&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;4&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;# 穷举&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;24&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;python&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;steg-audit.py&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-i&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;hidden.png&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;--auto&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;--brute&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;digits&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;--brute-max&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;5&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-j&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;4&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;25&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;python&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;steg-audit.py&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-i&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;hidden.png&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;--auto&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-d&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;outdir&lt;/span&gt;&lt;span&gt;             &lt;/span&gt;&lt;span&gt;# 导出命中&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;26&lt;/div&gt;&lt;/div&gt;&lt;div&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;27&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;# ============ 分割 / 合并 ============&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;28&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;python&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;img-split.py&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;split&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-i&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;hidden.png&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-r&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;1:2:1&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-o&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;parts&lt;/span&gt;&lt;span&gt;              &lt;/span&gt;&lt;span&gt;# 横向三段&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;29&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;python&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;img-split.py&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;split&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-i&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;hidden.png&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-r&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;30:70&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-D&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;v&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-o&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;parts&lt;/span&gt;&lt;span&gt;         &lt;/span&gt;&lt;span&gt;# 纵向&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;30&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;python&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;img-split.py&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;split&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-i&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;hidden.png&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-r&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;1:1&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-R&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;1:1&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-D&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;grid&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-o&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;parts&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;# 2×2 网格&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;31&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;python&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;img-split.py&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;merge&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-d&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;parts&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;-o&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;merged.png&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;--verify&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span&gt;hidden.png&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;span&gt;展开&lt;/span&gt;&lt;span&gt;收起&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;退出码约定&lt;/strong&gt;&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;码&lt;/th&gt;&lt;th&gt;含义&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;0&lt;/td&gt;&lt;td&gt;至少一个密钥匹配 / 正常完成&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;1&lt;/td&gt;&lt;td&gt;不是有效隐写文件 / 参数错误&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;2&lt;/td&gt;&lt;td&gt;所有候选都不匹配；split 遇到有损格式拒绝执行&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;3&lt;/td&gt;&lt;td&gt;&lt;code&gt;--verify&lt;/code&gt; 哈希不一致&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;130&lt;/td&gt;&lt;td&gt;用户 Ctrl+C 中断&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/section&gt;
+&lt;section&gt;&lt;h2&gt;术语注释&lt;a href=&quot;#术语注释&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;按主题分组。「参见」列指向正文中首次展开该概念的小节。&lt;/p&gt;&lt;section&gt;&lt;h3&gt;A. 隐写与图像&lt;a href=&quot;#a-隐写与图像&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;术语&lt;/th&gt;&lt;th&gt;释义&lt;/th&gt;&lt;th&gt;参见&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;隐写术 Steganography&lt;/td&gt;&lt;td&gt;把信息藏进另一个看起来正常的载体，目标是”不引起怀疑”。与加密的”看不懂”是两个正交的问题&lt;/td&gt;&lt;td&gt;§1&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;载体 Carrier&lt;/td&gt;&lt;td&gt;用来承载隐藏数据的原始图片&lt;/td&gt;&lt;td&gt;§2&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;载荷 Payload&lt;/td&gt;&lt;td&gt;要藏进去的数据本体。这里是”文件名长度 + 文件名 + 文件字节”打包后的结果，加密后成为密文&lt;/td&gt;&lt;td&gt;§2&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;槽位 Slot&lt;/td&gt;&lt;td&gt;一个独立的加密数据单元，自带 salt、nonce、MAC 和密文。一张图可以有多个槽位，各用各的密钥&lt;/td&gt;&lt;td&gt;§2&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;密文 ct / 明文 pt&lt;/td&gt;&lt;td&gt;ciphertext / plaintext 的缩写，代码里的变量名&lt;/td&gt;&lt;td&gt;§3.3&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;LSB 最低有效位&lt;/td&gt;&lt;td&gt;Least Significant Bit。一个字节 8 位中权值为 1 的那位，翻转它只让像素值 ±1，肉眼无法分辨&lt;/td&gt;&lt;td&gt;§4&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;通道 Channel&lt;/td&gt;&lt;td&gt;&lt;strong&gt;本文有两处含义&lt;/strong&gt;：① RGB 的 R/G/B 分量（每像素 3 个通道，决定容量）；② 承载数据的媒介层，即 LSB 层或 append 层。按上下文区分&lt;/td&gt;&lt;td&gt;§4 §5&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;颜色模式 RGB / RGBA / L / P&lt;/td&gt;&lt;td&gt;RGB 三通道；RGBA 额外带透明度；L 灰度单通道；P 调色板（像素存索引而非颜色，必须先转 RGB 才能安全处理）&lt;/td&gt;&lt;td&gt;§10&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;无损 / 有损压缩&lt;/td&gt;&lt;td&gt;无损指解码后像素与原始完全一致；有损指解码后像素已被改变。PNG 无损，JPEG 有损&lt;/td&gt;&lt;td&gt;§6&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Deflate&lt;/td&gt;&lt;td&gt;PNG 使用的无损压缩算法（LZ77 + 霍夫曼编码），依赖相邻像素的相关性，所以随机化 LSB 会降低压缩率、让文件变大&lt;/td&gt;&lt;td&gt;§4&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;IEND&lt;/td&gt;&lt;td&gt;PNG 的最后一个数据块，标记图像结束。解码器读到它就停，后面的字节被静默忽略——append 通道正建立在这个行为上&lt;/td&gt;&lt;td&gt;§5&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;PSNR 峰值信噪比&lt;/td&gt;&lt;td&gt;10·log₁₀(255²/MSE)，衡量图像失真程度。一般 &amp;gt;40 dB 即视为视觉无损，本文 888 bit 载荷实测 77 dB&lt;/td&gt;&lt;td&gt;§4&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;MSE 均方误差&lt;/td&gt;&lt;td&gt;逐像素差值平方的平均值，是 PSNR 的输入&lt;/td&gt;&lt;td&gt;§4&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;重编码 Re-encoding&lt;/td&gt;&lt;td&gt;把图片解码后用另一种格式（或有损参数）重新保存。LSB 载荷经不起一次 JPEG 重编码&lt;/td&gt;&lt;td&gt;§5&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;DCT 离散余弦变换&lt;/td&gt;&lt;td&gt;JPEG 把 8×8 像素块变换到频域再量化，量化是有损的根源，也是 LSB 无法在 JPEG 上存活的原因&lt;/td&gt;&lt;td&gt;§6&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;卡方检验 / RS 分析&lt;/td&gt;&lt;td&gt;两种经典的 LSB 统计检测法，靠分析像素值分布的异常来判定”这张图的低位被随机化过”&lt;/td&gt;&lt;td&gt;§13&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;调色板排序隐写&lt;/td&gt;&lt;td&gt;通过调整调色板条目顺序来编码信息，能抗部分重编码，但容量极小&lt;/td&gt;&lt;td&gt;§13&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;B. 密码学原语&lt;a href=&quot;#b-密码学原语&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;术语&lt;/th&gt;&lt;th&gt;释义&lt;/th&gt;&lt;th&gt;参见&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;Kerckhoffs 原则&lt;/td&gt;&lt;td&gt;密码系统的安全性应当只依赖密钥；算法与实现即使全部公开，也应保持安全。这是判断”源码泄露是否致命”的依据&lt;/td&gt;&lt;td&gt;全文&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;KDF 密钥派生函数&lt;/td&gt;&lt;td&gt;把低熵的口令拉伸成高熵密钥的函数。它是整套系统”防暴力破解”的唯一屏障&lt;/td&gt;&lt;td&gt;§3.1&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;PBKDF2&lt;/td&gt;&lt;td&gt;RFC 8018 定义的 KDF，用 HMAC 对”口令 + 盐”反复迭代指定次数&lt;/td&gt;&lt;td&gt;§3.1&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;盐 Salt&lt;/td&gt;&lt;td&gt;每次派生时随机生成、随密文一起公开存储的值。作用是让相同口令产生不同密钥，废掉预计算表&lt;/td&gt;&lt;td&gt;§3.1&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;迭代次数 Iteration count&lt;/td&gt;&lt;td&gt;PBKDF2 的循环次数。本文 100,000 次，实测 34.5 ms/次——这个数字直接决定穷举速度&lt;/td&gt;&lt;td&gt;§3.1 §9&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;密钥熵&lt;/td&gt;&lt;td&gt;密钥的不确定度，以 bit 计，等于 log₂(候选空间大小)。8 位随机字母数字约 47.6 bit&lt;/td&gt;&lt;td&gt;§9&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;密钥流 Keystream&lt;/td&gt;&lt;td&gt;与明文等长、由密钥生成的伪随机字节序列。加密就是”明文 XOR 密钥流”&lt;/td&gt;&lt;td&gt;§3.2&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;PRF 伪随机函数&lt;/td&gt;&lt;td&gt;给定随机密钥后，输出与真随机不可区分的函数。HMAC 就是一个 PRF&lt;/td&gt;&lt;td&gt;§3.2&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;PRF-CTR&lt;/td&gt;&lt;td&gt;用 PRF 依次对”nonce + 递增计数器”求值，把结果拼成密钥流。本文采用的构造&lt;/td&gt;&lt;td&gt;§3.2&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;nonce&lt;/td&gt;&lt;td&gt;number used once，一次性随机数。这里作为密钥流的起始输入，保证同一密钥每次加密得到不同密钥流&lt;/td&gt;&lt;td&gt;§3.2&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;XOR 异或&lt;/td&gt;&lt;td&gt;按位运算，相同为 0、不同为 1。特性是 a XOR b XOR b = a，所以加密和解密是同一个操作&lt;/td&gt;&lt;td&gt;§3.2&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;HMAC&lt;/td&gt;&lt;td&gt;基于哈希的消息认证码，H((K⊕opad) ‖ H((K⊕ipad) ‖ m))。用于验证数据未被篡改&lt;/td&gt;&lt;td&gt;§3.3&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;MAC 消息认证码&lt;/td&gt;&lt;td&gt;用密钥生成的”数据指纹”，只有持有密钥的人才能算出或验证&lt;/td&gt;&lt;td&gt;§3.3&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Encrypt-then-MAC&lt;/td&gt;&lt;td&gt;先加密、再对密文算 MAC；接收端先验 MAC 再解密。比 MAC-then-Encrypt 安全，攻击者无法在解密前操纵密文结构&lt;/td&gt;&lt;td&gt;§3.3&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;常数时间比较&lt;/td&gt;&lt;td&gt;比较耗时与内容无关，不会”第一个字节不同就提前返回”。防止攻击者靠响应时间逐字节猜出正确值&lt;/td&gt;&lt;td&gt;§3.3&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;时序侧信道&lt;/td&gt;&lt;td&gt;通过测量执行时间反推秘密信息的攻击方式&lt;/td&gt;&lt;td&gt;§3.3&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;域分离 Domain separation&lt;/td&gt;&lt;td&gt;用同一主密钥派生多个用途的子密钥时，给每个用途加不同标签，防止一个用途的输入撞上另一个用途的输入&lt;/td&gt;&lt;td&gt;§3.4&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;HKDF&lt;/td&gt;&lt;td&gt;RFC 5869，基于 HMAC 的”提取—扩展”两步密钥派生，常用来做域分离&lt;/td&gt;&lt;td&gt;§3.4&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Argon2id&lt;/td&gt;&lt;td&gt;2015 年密码哈希竞赛冠军，内存硬（memory-hard）设计。同样时间成本下，抗 GPU/ASIC 能力远强于 PBKDF2&lt;/td&gt;&lt;td&gt;§13&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;SHA-256&lt;/td&gt;&lt;td&gt;输出 256 bit 的哈希函数。本文用作 PBKDF2 的底层 PRF，也是 HMAC 的哈希&lt;/td&gt;&lt;td&gt;全文&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;大端序 Big-endian&lt;/td&gt;&lt;td&gt;高位字节在前。对应 &lt;code&gt;struct&lt;/code&gt; 的 &lt;code&gt;&amp;gt;&lt;/code&gt; 前缀，如 &lt;code&gt;&amp;gt;Q&lt;/code&gt; 表示 8 字节大端无符号整数&lt;/td&gt;&lt;td&gt;§2&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;长度扩展攻击&lt;/td&gt;&lt;td&gt;对 Merkle–Damgård 结构的哈希（MD5/SHA-1/SHA-256），可以在未知内容后追加数据并算出合法摘要。HMAC 不受此影响&lt;/td&gt;&lt;td&gt;§12&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;C. 攻击与破解&lt;a href=&quot;#c-攻击与破解&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;术语&lt;/th&gt;&lt;th&gt;释义&lt;/th&gt;&lt;th&gt;参见&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;穷举 / 暴力破解 Brute force&lt;/td&gt;&lt;td&gt;按字符集和长度遍历所有可能的密钥&lt;/td&gt;&lt;td&gt;§9&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;字典攻击 Dictionary attack&lt;/td&gt;&lt;td&gt;用一份”常见密钥”清单逐个尝试，比穷举高效得多&lt;/td&gt;&lt;td&gt;§9&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;自动候选&lt;/td&gt;&lt;td&gt;用图片文件名、目录名、同目录其它文件名，加上内置弱密钥表自动生成候选，模拟人的命名习惯&lt;/td&gt;&lt;td&gt;§9&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;oracle 判定预言机&lt;/td&gt;&lt;td&gt;能回答”这个猜测对不对”的黑盒。本文的 HMAC 校验构成一个完美的&lt;strong&gt;离线&lt;/strong&gt; oracle，无速率限制&lt;/td&gt;&lt;td&gt;威胁模型&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;离线攻击&lt;/td&gt;&lt;td&gt;拿到文件后在本地随便跑，不与原系统交互，因此没有锁定、没有日志、没有频率限制&lt;/td&gt;&lt;td&gt;威胁模型&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;合理推诿 Plausible deniability&lt;/td&gt;&lt;td&gt;被胁迫时能交出一份”看起来合理”的替代内容而不被识破。本文的诱饵机制不具备这个能力&lt;/td&gt;&lt;td&gt;§8&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;诱饵 Decoy&lt;/td&gt;&lt;td&gt;错误密钥时输出的假文件（&lt;code&gt;a.txt&lt;/code&gt;，内容”这是棍母”）&lt;/td&gt;&lt;td&gt;§8&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;假阴性 False negative&lt;/td&gt;&lt;td&gt;实际无损却报告”不一致”。&lt;code&gt;--verify&lt;/code&gt; 对 JPEG 输入就会产生&lt;/td&gt;&lt;td&gt;§10.6&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;padding oracle&lt;/td&gt;&lt;td&gt;利用解密时填充校验的报错差异逐字节还原明文的攻击。流密码没有填充，因此不存在这个攻击面&lt;/td&gt;&lt;td&gt;§12&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;吞吐率&lt;/td&gt;&lt;td&gt;每秒尝试的候选数。本文 CPU 单线程实测 29/s&lt;/td&gt;&lt;td&gt;§9&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;D. 工程与格式&lt;a href=&quot;#d-工程与格式&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;术语&lt;/th&gt;&lt;th&gt;释义&lt;/th&gt;&lt;th&gt;参见&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;不变量 Invariant&lt;/td&gt;&lt;td&gt;在操作前后必须始终成立的等式。&lt;code&gt;img-split&lt;/code&gt; 的不变量是”原图 = 所有切块的拼合”&lt;/td&gt;&lt;td&gt;§10&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;累积取整&lt;/td&gt;&lt;td&gt;用累计比例再取整，而不是每段独立取整，避免舍入误差逐段累积&lt;/td&gt;&lt;td&gt;§10&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;manifest&lt;/td&gt;&lt;td&gt;描述切分结果的元数据清单（JSON），记录每块的绝对坐标、尺寸、格式和原图哈希&lt;/td&gt;&lt;td&gt;§10&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;分块粒度 Batch size&lt;/td&gt;&lt;td&gt;多线程任务切分的单位。本文 &lt;code&gt;BATCH=200&lt;/code&gt;，导致候选数少时只有一个线程在干活&lt;/td&gt;&lt;td&gt;§9&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;GIL 全局解释器锁&lt;/td&gt;&lt;td&gt;CPython 限制同一时刻只有一个线程执行字节码。但 &lt;code&gt;hashlib&lt;/code&gt; 的 C 实现会释放 GIL，所以 PBKDF2 多线程仍有收益&lt;/td&gt;&lt;td&gt;§9&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/section&gt;&lt;section&gt;&lt;h3&gt;两处容易混淆的说法&lt;a href=&quot;#两处容易混淆的说法&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;「通道」&lt;/strong&gt; —— 正文里既指 RGB 的三个颜色分量，也指 LSB / append 两种承载层。看到”3 个通道”是前者，看到”两条通道&quot;&quot;指定通道”是后者。&lt;/p&gt;&lt;p&gt;&lt;strong&gt;「密钥」与「口令」&lt;/strong&gt; —— 代码里统一叫 &lt;code&gt;signature&lt;/code&gt; 或 &lt;code&gt;key&lt;/code&gt;，实际是用户输入的一串短字符。它并不直接参与加密，而是先经 PBKDF2 拉伸成 32 字节真正的密钥。所以文中说”密钥强度”，指的始终是那串&lt;strong&gt;短字符的熵&lt;/strong&gt;，不是派生出的 32 字节。&lt;/p&gt;&lt;hr /&gt;&lt;/section&gt;&lt;/section&gt;
+&lt;section&gt;&lt;h2&gt;注：全文在AI的帮助下完成，审核修改由人工进行&lt;a href=&quot;#注全文在ai的帮助下完成审核修改由人工进行&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;&lt;/section&gt;</content:encoded></item><item><title>Firefly 简单使用指南</title><link>https://blog.sslc0721.xyz/posts/guide/</link><guid isPermaLink="true">https://blog.sslc0721.xyz/posts/guide/</guid><description>如何使用 Firefly 博客模板。</description><pubDate>Fri, 02 Jan 1970 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;这个博客模板是基于 &lt;a href=&quot;https://astro.build/&quot; target=&quot;_blank&quot;&gt;Astro&lt;/a&gt; 构建的。对于本指南中未提及的内容，您可以在 &lt;a href=&quot;https://docs.astro.build/&quot; target=&quot;_blank&quot;&gt;Astro 文档&lt;/a&gt; 中找到答案。&lt;/p&gt;
 &lt;section&gt;&lt;h2&gt;文章的 Front-matter&lt;a href=&quot;#文章的-front-matter&quot;&gt;&lt;span&gt;#&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;&lt;div&gt;&lt;figure&gt;&lt;figcaption&gt;&lt;/figcaption&gt;&lt;pre&gt;&lt;code&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;1&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;---&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;2&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;title&lt;/span&gt;&lt;span&gt;: &lt;/span&gt;&lt;span&gt;我的第一篇博客文章&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;3&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;published&lt;/span&gt;&lt;span&gt;: &lt;/span&gt;&lt;span&gt;2023-09-09&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;4&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;description&lt;/span&gt;&lt;span&gt;: &lt;/span&gt;&lt;span&gt;这是我新 Astro 博客的第一篇文章。&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;5&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;image&lt;/span&gt;&lt;span&gt;: &lt;/span&gt;&lt;span&gt;./cover.jpg&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;6&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;tags&lt;/span&gt;&lt;span&gt;: [&lt;/span&gt;&lt;span&gt;前端&lt;/span&gt;&lt;span&gt;, &lt;/span&gt;&lt;span&gt;开发&lt;/span&gt;&lt;span&gt;]&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;7&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;category&lt;/span&gt;&lt;span&gt;: &lt;/span&gt;&lt;span&gt;前端开发&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;8&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;draft&lt;/span&gt;&lt;span&gt;: &lt;/span&gt;&lt;span&gt;false&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;div&gt;9&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;---&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
 
 
