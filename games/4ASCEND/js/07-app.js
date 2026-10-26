@@ -21,7 +21,19 @@ function newGame(){
 
 function onCell(i){
   if(locked||replay.active)return;
+  /* 联机时落子要先过网络层：自己这手可能是「发给房主」，对手那半场则直接忽略 */
+  if(typeof netHandleCell==='function'&&netHandleCell(i))return;
   play(i,false);
+}
+
+/* 「新对局」的统一入口：本地直接重开，联机则变成一次「请求再来一局」，
+ * 否则双方各自 newGame 会得到两份不同的棋（随机数不一样），必然走岔。 */
+function requestNewGame(){
+  if(typeof netRequestRematch==='function'&&typeof NET!=='undefined'&&NET.active){
+    netRequestRematch();
+    return;
+  }
+  newGame();
 }
 
 /* 「重新开始」= 把这一局从头再走一遍。
@@ -92,7 +104,7 @@ $('#board').addEventListener('click',e=>{
 document.addEventListener('pointerdown',()=>{if(!AC)ac();ensureMusic();},{once:true});
 window.addEventListener('resize',fitBoard);
 
-$('#btn-new').addEventListener('click',newGame);
+$('#btn-new').addEventListener('click',()=>requestNewGame());
 $('#btn-rules').addEventListener('click',()=>$('#modal').classList.add('open'));
 $('#btn-close').addEventListener('click',()=>$('#modal').classList.remove('open'));
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal')$('#modal').classList.remove('open');});
@@ -125,7 +137,7 @@ function isUIControl(t){
 document.addEventListener('click',e=>{
   if(!canRestart())return;
   if(isUIControl(e.target))return;
-  newGame();
+  requestNewGame();
 });
 document.addEventListener('keydown',e=>{
   if(e.key!==' '&&e.code!=='Space')return;
@@ -135,7 +147,7 @@ document.addEventListener('keydown',e=>{
   const t=e.target;
   if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'))return;
   e.preventDefault();   // 同时阻止焦点按钮被空格「按下」
-  newGame();
+  requestNewGame();
 });
 
 /* 设置面板：音效 / 音乐 / AI / 主题分组 */
@@ -270,6 +282,14 @@ function syncHintsUI(){
     b.classList.toggle('on',(b.dataset.hints==='1')===hintsOn));
 }
 $('#btn-mode').addEventListener('click',e=>{
+  /* 联机中不允许在本地切模式：那只会改到本机的 mode 变量，
+     对手那边仍在联机，两边对「谁该走」的判断会立刻分家 */
+  if(typeof NET!=='undefined'&&NET.active){
+    /* 对手已经走了、桌子作废：先干净地退出联机，再让模式切换照常进行。
+     * 否则会留下「本地已换模式、联机状态还挂着」的半吊子，点棋盘会往死桌子上发消息 */
+    if(!NET.tableDead){toast('联机中不能切换模式，请先断开连接');return;}
+    netLeaveToLocal();
+  }
   mode=mode==='ai'?'pvp':'ai';
   e.currentTarget.textContent=mode==='ai'?'模式：挑战魔族':'模式：双人对战';
   syncSetForm();
@@ -296,7 +316,7 @@ function syncSetForm(){
   $('#lbl-hp').textContent=CFG.maxHp+' 点';
   $('#lbl-plant').textContent=Math.round(CFG.plantChance*100)+'%';
   document.querySelectorAll('#seg-mode .seg-btn').forEach(b=>b.classList.toggle('on',b.dataset.mode===mode));
-  $('#btn-mode').textContent=mode==='ai'?'模式：挑战魔族':'模式：双人对战';
+  $('#btn-mode').textContent=mode==='ai'?'模式：挑战魔族':mode==='net'?'模式：远程联机':'模式：双人对战';
   syncSoundUI();syncMusicUI();initAiMode();syncFxUI();syncHintsUI();syncAiCustomUI();
   document.querySelectorAll('#seg-theme .seg-btn').forEach(b=>b.classList.toggle('on',b.dataset.theme===currentTheme));
 }
@@ -314,6 +334,16 @@ $('#seg-mode').addEventListener('click',e=>{
   $('#btn-mode').textContent=mode==='ai'?'模式：挑战魔族':'模式：双人对战';
 });
 $('#btn-apply').addEventListener('click',()=>{
+  /* 联机中的棋盘大小/生命由房主在开局时统一广播，本地改了也不会生效，
+     干脆挡住，免得玩家以为改完了却还是老样子 */
+  if(typeof NET!=='undefined'&&NET.active){
+    /* 同上：桌子已废就别拦着，先退出联机再改设置 */
+    if(!NET.tableDead){
+      toast('联机中由房主决定对局设置，请先断开连接');
+      return;
+    }
+    netLeaveToLocal();
+  }
   CFG.size=+$('#in-size').value;
   CFG.maxHp=+$('#in-hp').value;
   CFG.plantChance=(+$('#in-plant').value)/100;
@@ -484,7 +514,7 @@ CTX.addEventListener('click',e=>{
   if(act==='music')setMusicWanted(!musicWanted());
   else if(act==='sfx'){setSfxWanted(!soundOn);if(soundOn)sfx('place');}
   else if(act==='fx')setFxWanted(!fxOn);
-  else if(act==='new'){newGame();toast('新对局');}
+  else if(act==='new'){requestNewGame();toast('新对局');}
   else if(act==='restart'){restartGame();toast('已重新开始这一局');}
   /* 动作已经改掉了状态，把文案写回 DOM：虽然下次打开也会重算，
      但让隐藏的菜单保持诚实，省得以后有别处直接读它的文本 */

@@ -242,8 +242,17 @@ function statusText(p){
   if(replay.active)return '回放中';
   if(S.over)return '对局结束';
   if(S.pending&&S.pending.owner!==p)return '危急：对手的 ASCEND 待结算';
-  if(S.turn===p)return mode==='ai'&&p===DEMON?'思考中…':'你的回合';
+  /* 联机时两块面板分属两台机器，「你的回合」只对自己那侧成立，
+   * 否则对手那栏会写着「你的回合」，看着像两个人抢着走 */
+  const remote=mode==='net'&&typeof NET!=='undefined'&&NET.active;
+  const mine=!remote||p===NET.mySide;
+  if(S.turn===p){
+    if(mode==='ai'&&p===DEMON)return '思考中…';
+    if(!mine)return '对手回合';
+    return '你的回合';
+  }
   if(S.pending&&S.pending.owner===p)return 'ASCEND 蓄势中';
+  if(!mine)return '对手待机';
   return '等待对手';
 }
 
@@ -262,7 +271,17 @@ function renderHUD(){
       : '<span class="none">无</span>';
     panel.querySelector('.status').textContent=statusText(p);
   }
-  $('#badge-2').textContent=mode==='ai'?'AI · '+aiCfg().label:'玩家 2';
+  /* 徽章要说明「这一侧归谁」：联机时一侧是你、一侧是对手。
+   * 只写「你/对手」而不是「你 · 先手」——先手是精灵方的固有规则，
+   * 多出来的字会把徽章撑宽，挤到左边的阵营名上 */
+  const b1=$('#badge-1'),b2=$('#badge-2');
+  if(mode==='net'&&typeof NET!=='undefined'&&NET.active){
+    b1.textContent=NET.mySide===ELF?'你':'对手';
+    b2.textContent=NET.mySide===DEMON?'你':'对手';
+  }else{
+    b1.textContent='先手';
+    b2.textContent=mode==='ai'?'AI · '+aiCfg().label:'玩家 2';
+  }
 
   const t=$('#turnbar');
   if(replay.active){
@@ -280,6 +299,10 @@ function renderHUD(){
     }else if(S.pending){
       extra='<span class="warn">⚠ '+NAMES[S.pending.owner]+'的 ASCEND 待结算 · '+
             S.pending.count+' 点伤害</span>';
+    }else if(mode==='net'&&typeof NET!=='undefined'&&NET.active&&S.turn!==NET.mySide){
+      extra='<span class="ok">等待对手落子…</span>';
+    }else if(mode==='net'&&typeof NET!=='undefined'&&NET.active&&NET.pendingMove!=null){
+      extra='<span class="ok">已发送，等待房主确认…</span>';
     }else if(S.threats.size&&hintsOn){
       extra='<span class="ok">✦ 你有 '+S.threats.size+' 处可以发动 ASCEND</span>';
     }
@@ -287,16 +310,31 @@ function renderHUD(){
                 '<b>'+NAMES[S.turn]+'</b> 行动</span>'+extra;
   }
 
+  /* 联机中：这一局是不是「我这边在等对手」——下面几处文案都要用 */
+  const remoteNow=mode==='net'&&typeof NET!=='undefined'&&NET.active;
+
   const hint=$('#hint');
   if(replay.active)hint.textContent='拖动进度条或点击右侧记录，可逐手查看这局的每一次落子与结算。';
-  else if(S.over)hint.textContent='对局结束。点击任意处或按空格即可再来一局，也可打开「对局记录」回放。';
+  else if(S.over)hint.textContent=
+    (remoteNow&&NET.tableDead)
+      ? '对手已离开，这一局判你获胜。点击任意处或按空格可开一局新的本地对战。'
+      : remoteNow
+        ? '对局结束。点击任意处或按空格可请求再来一局，也可打开「对局记录」回放。'
+        : '对局结束。点击任意处或按空格即可再来一局，也可打开「对局记录」回放。';
   else if(!hintsOn)hint.textContent='';
   else if(S.pending)hint.textContent='对手的 ASCEND 悬在头顶：落在虚影处可反击削弱它，或以更大的 ASCEND 抵消，否则将承受全部伤害。';
   else if(S.threats.size)hint.textContent='金色虚线处落子即可发动 ASCEND，闪烁金光的棋子将一同离盘。';
   else hint.textContent='点击空位落子。连成 4 枚或以上即可发动 ASCEND，注意魔力植物上的棋子会更有力。';
 
-  /* 终局提示条：可点击/空格重开 */
-  $('#again').classList.toggle('show',S.over&&!replay.active);
+  /* 终局提示条：可点击/空格重开。联机时点它只是「请求」再来一局，
+   * 由房主那边真正开局，所以文案要跟着改，不能骗人说立刻重开 */
+  const again=$('#again');
+  again.textContent=(remoteNow&&NET.tableDead)
+    ? '对手已离开 · 点击任意处 或 按 空格 开一局本地对战'
+    : remoteNow
+      ? '点击任意处 或 按 空格 请求再来一局'
+      : '点击任意处 或 按 空格 再来一局';
+  again.classList.toggle('show',S.over&&!replay.active);
 
   /* AI 思考统计 */
   const info=$('#ai-info');
@@ -320,6 +358,9 @@ function refreshThreats(silent){
 
 
 /* ================= record UI ================= */
+/* 模式的中文名：联机局导出的棋谱要能看出这是远程下的，不能都写成「双人对战」 */
+function modeName(m){return m==='ai'?'挑战魔族':m==='net'?'远程联机':'双人对战';}
+
 function renderRecord(){
   const rec=S.record;
   const st=rec.settings;
@@ -328,7 +369,7 @@ function renderRecord(){
     : (replay.active?'回放中':'对局进行中');
   $('#rec-meta').innerHTML=
     '<b>'+st.size+' × '+st.size+'</b> 棋盘 · 初始生命 <b>'+st.maxHp+'</b> · 魔力植物 <b>'+
-    Math.round(st.plantChance*100)+'%</b> · '+(st.mode==='ai'?'挑战魔族':'双人对战')+'<br>'+
+    Math.round(st.plantChance*100)+'%</b> · '+modeName(st.mode)+'<br>'+
     '共 <b>'+rec.steps.length+'</b> 手 · 结果：<b>'+result+'</b>'+
     (rec.forkedFrom!=null?'<br>本谱由第 '+rec.forkedFrom+' 步分叉而来':'');
 
@@ -412,7 +453,7 @@ function recordText(){
   const lines=[];
   lines.push('4ASCEND 对局记录');
   lines.push('棋盘 '+st.size+'×'+st.size+' · 初始生命 '+st.maxHp+' · 魔力植物 '+
-             Math.round(st.plantChance*100)+'% · 模式：'+(st.mode==='ai'?'挑战魔族':'双人对战'));
+             Math.round(st.plantChance*100)+'% · 模式：'+modeName(st.mode));
   lines.push('结果：'+(S.over?(S.winner?NAMES[S.winner]+' 获胜':'平局'):'对局进行中')+
              ' · 共 '+rec.steps.length+' 手');
   lines.push('────────────────────────────');
@@ -460,7 +501,9 @@ function importRecord(data){
   CFG.size=size;
   CFG.maxHp=Math.max(1,+data.settings.maxHp||20);
   CFG.plantChance=Math.max(0,Math.min(1,+data.settings.plantChance||0));
-  mode=data.settings.mode==='pvp'?'pvp':'ai';
+  /* 导入的是回放，不接回任何连接：联机谱按本地双人打开即可，
+     记录头里的 mode 仍保留 'net'，所以面板上照样写「远程联机」 */
+  mode=data.settings.mode==='ai'?'ai':'pvp';
   newState();
   buildBoard();fitBoard();
   S.record=data;

@@ -10,7 +10,10 @@ function play(idx,isAI){
   if(!isAI&&mode==='ai'&&S.turn===DEMON)return;
 
   const p=S.turn,foe=other(p);
-  const info={acts:[],note:[]};
+  /* fx 是这一手的「演出清单」：联机时房主要把它随局面一起发给对手，
+   * 对手才能重放同样的涟漪、金光、飘字与发芽，而不是只看到结果。
+   * 所以这里记录的是「发生了什么」，而不是直接去动 DOM。 */
+  const info={acts:[],note:[],fx:{ascend:null,grown:[],dmg:null,counter:0}};
   let ascend=null;
 
   info.note.push(SHORT[p]+' 落子 ('+(Math.floor(idx/N)+1)+','+(idx%N+1)+')');
@@ -25,6 +28,7 @@ function play(idx,isAI){
       S.pending.power=Math.max(0,S.pending.power-(cnt+stolen));
       S.reserve[p]+=stolen;
       info.acts.push('反击');
+      info.fx.counter=cnt;
       info.note.push('反击 '+cnt+' 枚'+(stolen?'，夺得 '+stolen+' 株魔力植物':''));
       addLog(SHORT[p]+'反击：落在残影上，'+SHORT[foe]+' 的 '+cnt+' 枚棋子失效'+(stolen?'，夺得 '+stolen+' 株魔力植物':''));
       sfx('counter');
@@ -34,6 +38,7 @@ function play(idx,isAI){
         const owner=S.pending.owner;
         S.pending=null;
         const g=growPlants(owner);
+        info.fx.grown.push(...g);
         if(g.length){info.acts.push('生长');info.note.push('生长 '+g.length+' 株魔力植物');}
       }
     }
@@ -48,6 +53,7 @@ function play(idx,isAI){
   const line=lineThrough(idx,p);
   if(line){
     ascend=line.map(i=>({idx:i,plant:!!S.plants[i]}));
+    info.fx.ascend=ascend.map(s=>({idx:s.idx,plant:s.plant}));
     line.forEach(i=>{S.board[i]=EMPTY;S.plants[i]=false;});
     S.barren++;
     const cnt=ascend.length;
@@ -70,8 +76,9 @@ function play(idx,isAI){
              SHORT[atk.owner]+' '+atk.count+'枚+'+Math.max(0,atk.power-atk.count)+'魔力'+
              (dmg?'，'+SHORT[victim]+' 受到 '+dmg+' 点伤害':'，完全抵消'));
       sfx('cancel');
-      if(dmg){applyDamage(victim,dmg);animateDamage(dmg,victim);}
+      if(dmg){applyDamage(victim,dmg);animateDamage(dmg,victim);info.fx.dmg={victim:victim,amount:dmg};}
       const g=growPlants(atk.owner);
+      info.fx.grown.push(...g);
       if(g.length){info.acts.push('生长');info.note.push('生长 '+g.length+' 株魔力植物');}
     }else{
       S.pending=attack;
@@ -87,9 +94,10 @@ function play(idx,isAI){
     info.acts.push('受伤');
     info.note.push('承受 '+SHORT[atk.owner]+' 的 ASCEND，'+SHORT[p]+' 受到 '+atk.count+' 点伤害');
     addLog(SHORT[atk.owner]+' 的 ASCEND 落下：'+SHORT[p]+' 受到 '+atk.count+' 点伤害');
-    if(atk.count){applyDamage(p,atk.count);animateDamage(atk.count,p);}
+    if(atk.count){applyDamage(p,atk.count);animateDamage(atk.count,p);info.fx.dmg={victim:p,amount:atk.count};}
     sfx('damage');
     const g=growPlants(atk.owner);
+    info.fx.grown.push(...g);
     if(g.length){info.acts.push('生长');info.note.push('生长 '+g.length+' 株魔力植物');}
   }
 
@@ -101,6 +109,10 @@ function play(idx,isAI){
   refreshThreats();
   renderAll();
   renderRecord();
+  /* 联机：房主是唯一权威，落子结算完立刻把整份局面推给对手。
+   * 用「全量快照 + 这一手的演出清单」而不是增量指令，对手那边的随机数
+   * （植物生长、AI）就永远不会和房主走岔。放在动画之前，先发出再演出。 */
+  if(typeof netAfterPlay==='function')netAfterPlay(p,idx,info,ascend);
   if(ascend)animateAscend(ascend,p);
   if(!S.over)maybeAI();
 }

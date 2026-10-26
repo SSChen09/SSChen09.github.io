@@ -651,3 +651,139 @@ button,.chip,.seg-btn,.rp-btn{-webkit-tap-highlight-color:transparent;touch-acti
   /* 手机窄，五个挤一行会把字压扁，改成 3+2 两行 */
   #seg-ai .seg-btn,#seg-theme .seg-btn{flex:1 1 30%;padding-left:4px;padding-right:4px}
 }
+
+/* ---------- 远程联机 · 大厅 ----------
+ * 联机是「叠加」在现有界面上的：棋盘区多一条状态条，顶部多一个大厅面板。
+ * 颜色全部走主题变量，五套主题下都能看。 */
+.netbar{display:none;align-items:center;gap:8px;padding:5px 12px;border-radius:999px;
+  background:rgba(232,182,76,.1);border:1px solid rgba(232,182,76,.32);
+  font-size:11.5px;letter-spacing:.1em;color:var(--gold2);line-height:1.6}
+.netbar.show{display:flex}
+.netbar.wait{border-color:rgba(232,182,76,.2);color:var(--muted)}
+.net-dot{width:7px;height:7px;border-radius:50%;flex:0 0 7px;
+  background:var(--plant);box-shadow:0 0 9px var(--plant)}
+.netbar.wait .net-dot{background:var(--gold);box-shadow:0 0 9px var(--gold);animation:netPulse 1.2s ease-in-out infinite}
+.netbar-x{border:0;background:none;padding:0 2px;cursor:pointer;color:var(--muted);
+  font:inherit;font-size:11px;letter-spacing:.08em;transition:.15s}
+.netbar-x:hover{color:var(--demon)}
+/* 延迟单独一格：等宽数字，免得 9ms→10ms 时整条状态栏左右跳 */
+.netbar-lat{flex:0 0 auto;padding:1px 8px;border-radius:999px;font-size:10.5px;
+  font-variant-numeric:tabular-nums;letter-spacing:.04em;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  color:var(--muted);white-space:nowrap}
+.netbar-lat:empty{display:none}
+.netbar-lat b{font-weight:600;color:var(--ink)}
+.netbar-lat[data-q="good"]{color:#a9f0c8;border-color:rgba(95,227,154,.3);background:rgba(95,227,154,.1)}
+.netbar-lat[data-q="ok"]{color:var(--gold2);border-color:rgba(232,182,76,.3);background:rgba(232,182,76,.1)}
+.netbar-lat[data-q="bad"]{color:#ffc6cd;border-color:rgba(255,107,125,.35);background:rgba(255,107,125,.1)}
+/* 手机上一条放不下就折行，别把「断开」挤到屏幕外 */
+@media (max-width:640px){
+  .netbar{flex-wrap:wrap;row-gap:4px}
+}
+@keyframes netPulse{0%,100%{opacity:1}50%{opacity:.22}}
+
+.net-sheet{width:min(720px,100%)}
+.net-lead{font-size:11.5px;line-height:1.9;color:#9d94b8;margin:6px 0 0;letter-spacing:.04em}
+
+/* 顶部：标题 + 连接状态 */
+.lobby-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.lobby-conn{display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  font-size:11px;letter-spacing:.08em;color:var(--muted);white-space:nowrap}
+.lobby-conn b{color:var(--ink);font-weight:600}
+.lobby-conn[data-kind="ok"]{border-color:rgba(95,227,154,.4);background:rgba(95,227,154,.08)}
+.lobby-conn[data-kind="busy"] .net-dot{background:var(--gold);box-shadow:0 0 9px var(--gold);animation:netPulse 1.2s ease-in-out infinite}
+.lobby-conn[data-kind="err"]{border-color:rgba(255,107,125,.45);background:rgba(255,107,125,.08)}
+.lobby-conn[data-kind="err"] .net-dot{background:var(--demon);box-shadow:0 0 9px var(--demon)}
+.lobby-ping{color:var(--gold2);font-variant-numeric:tabular-nums;min-width:34px;text-align:right}
+.lobby-ping:empty{display:none}
+
+/* 昵称 */
+.lobby-me{display:flex;align-items:center;gap:9px;margin:16px 0 0}
+.lobby-me label{font-size:11px;letter-spacing:.18em;color:var(--muted);flex:0 0 auto}
+.lobby-name{flex:1;min-width:0;padding:9px 12px;border-radius:10px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(232,182,76,.24);
+  color:var(--ink);font-size:13px;letter-spacing:.06em;outline:none;transition:.15s}
+.lobby-name:focus{border-color:rgba(232,182,76,.7);background:rgba(232,182,76,.07)}
+.lobby-name:disabled{opacity:.5}
+
+/* 服务器地址：手动填，连到别的机器上去。
+ * 和昵称同一套骨架，只是默认状态下边框更低调——大多数人是直接连同源 */
+.lobby-server{display:flex;align-items:center;gap:9px;margin:16px 0 0}
+.lobby-server label{font-size:11px;letter-spacing:.18em;color:var(--muted);flex:0 0 auto}
+.lobby-addr{flex:1;min-width:0;padding:9px 12px;border-radius:10px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);
+  color:var(--ink);font-size:12.5px;letter-spacing:.04em;outline:none;transition:.15s;
+  font-variant-numeric:tabular-nums}
+.lobby-addr::placeholder{color:rgba(157,148,184,.75);letter-spacing:.02em}
+.lobby-addr:focus{border-color:rgba(232,182,76,.7);background:rgba(232,182,76,.07)}
+.lobby-addr:disabled{opacity:.55}
+.lobby-server .chip:disabled{opacity:.45;cursor:not-allowed}
+
+/* 玩家行里的延迟：只有测到了才占位，没测到就整块消失 */
+.lb-lat{flex:0 0 auto;font-size:10px;letter-spacing:.04em;padding:2px 6px;border-radius:6px;
+  font-variant-numeric:tabular-nums;color:var(--muted);
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09)}
+.lb-lat[data-q="good"]{color:#a9f0c8;border-color:rgba(95,227,154,.28);background:rgba(95,227,154,.09)}
+.lb-lat[data-q="ok"]{color:var(--gold2);border-color:rgba(232,182,76,.28);background:rgba(232,182,76,.09)}
+.lb-lat[data-q="bad"]{color:#ffc6cd;border-color:rgba(255,107,125,.32);background:rgba(255,107,125,.09)}
+
+/* 快速匹配 */
+.lobby-quick{display:flex;align-items:center;gap:14px;margin:14px 0 0;padding:14px 16px;
+  border-radius:14px;background:rgba(232,182,76,.07);border:1px solid rgba(232,182,76,.24)}
+.lobby-quick-txt{flex:1;min-width:0}
+.lobby-quick-txt b{font-size:13px;letter-spacing:.12em;color:var(--gold2);font-weight:600}
+.lobby-quick-txt .tip{margin:4px 0 0;font-size:11px;line-height:1.7;color:#8f86ad;letter-spacing:.04em}
+.lobby-quick .chip{flex:0 0 auto;white-space:nowrap}
+
+/* 收到的挑战 */
+.lobby-invite{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  margin:12px 0 0;padding:11px 14px;border-radius:12px;
+  background:rgba(127,227,212,.1);border:1px solid rgba(127,227,212,.4);
+  font-size:12px;letter-spacing:.06em;color:#c6f6ee}
+.lobby-invite[hidden]{display:none}
+.lobby-invite-btns{display:flex;gap:8px}
+
+/* 两栏：玩家 / 房间 */
+.lobby-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0 0}
+.lobby-col{min-width:0}
+.lobby-col h3,.lobby-col-head h3{margin:0 0 8px;font-size:11px;letter-spacing:.18em;color:var(--muted);font-weight:600}
+.lobby-col h3 span,.lobby-col-head h3 span{color:var(--gold2);font-variant-numeric:tabular-nums}
+.lobby-col-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lobby-col-head .chip{padding:4px 10px;font-size:11px}
+.lobby-list{list-style:none;margin:0;padding:0;max-height:190px;overflow:auto;
+  border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07)}
+.lb-row{display:flex;align-items:center;gap:8px;padding:8px 11px;
+  border-bottom:1px solid rgba(255,255,255,.055);font-size:12px}
+.lb-row:last-child{border-bottom:0}
+.lb-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.lb-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.lb-host{font-size:12px;color:var(--ink);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-meta{font-size:10px;letter-spacing:.06em;color:#8f86ad;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-status{flex:0 0 auto;font-size:10px;letter-spacing:.08em;padding:2px 7px;border-radius:999px;
+  background:rgba(255,255,255,.06);color:var(--muted)}
+.lb-status.s-idle{background:rgba(95,227,154,.14);color:#a9f0c8}
+.lb-status.s-queued{background:rgba(232,182,76,.16);color:var(--gold2)}
+.lb-status.s-waiting{background:rgba(232,182,76,.16);color:var(--gold2)}
+.lb-status.s-playing{background:rgba(127,227,212,.16);color:#bdf4e9}
+.lb-status.s-away{background:rgba(255,107,125,.16);color:#ffc6cd}
+.lb-empty{padding:16px 12px;font-size:11.5px;line-height:1.8;color:#7d7499;text-align:center}
+.chip.tiny{padding:4px 10px;font-size:11px;letter-spacing:.06em}
+
+.lobby-hint{margin:12px 0 0;font-size:11px;line-height:1.8;letter-spacing:.05em;color:#8f86ad;min-height:1.2em}
+.lobby-hint:empty{display:none}
+.lobby-hint.bad{color:#ffc6cd}
+
+.net-foot{display:flex;gap:8px;margin-top:16px}
+.chip.danger{color:#ffc6cd;border-color:rgba(255,107,125,.4);background:rgba(255,107,125,.1)}
+.chip.danger:hover{background:rgba(255,107,125,.2);border-color:rgba(255,107,125,.75);color:#fff}
+.chip:disabled{opacity:.42;cursor:not-allowed;transform:none;filter:none}
+
+@media(max-width:640px){
+  .lobby-cols{grid-template-columns:1fr}
+  .lobby-list{max-height:150px}
+  .lobby-quick{flex-direction:column;align-items:stretch;gap:10px}
+  .lobby-quick .chip{width:100%}
+  .net-foot{flex-direction:column}
+  .net-foot .chip{width:100%}
+}

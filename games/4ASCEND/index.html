@@ -55,6 +55,7 @@ noscript .boot-noscript{display:block}
     </div>
     <nav class="controls">
       <button class="chip" id="btn-mode">模式：挑战魔族</button>
+      <button class="chip" id="btn-net">联机</button>
       <button class="chip" id="btn-set">设置</button>
       <button class="chip" id="btn-record">对局记录</button>
       <button class="chip" id="btn-rules">规则</button>
@@ -71,7 +72,7 @@ noscript .boot-noscript{display:block}
           </svg>
         </span>
         <div><h2>精灵阵营</h2><p class="sub">ELVES · 执白</p></div>
-        <span class="badge">先手</span>
+        <span class="badge" id="badge-1">先手</span>
       </div>
       <div class="hp-row">
         <span class="label">生命值</span>
@@ -86,6 +87,12 @@ noscript .boot-noscript{display:block}
 
     <section class="board-area">
       <div class="turnbar" id="turnbar"></div>
+      <div class="netbar" id="netbar">
+        <span class="net-dot" aria-hidden="true"></span>
+        <span id="netbar-txt">联机中</span>
+        <span class="netbar-lat" id="netbar-lat" hidden></span>
+        <button class="netbar-x" id="netbar-x" type="button">断开</button>
+      </div>
       <p class="ai-info" id="ai-info"></p>
       <div class="board-frame" id="frame">
         <div class="board" id="board"><div class="floats" id="floats"></div></div>
@@ -305,7 +312,80 @@ noscript .boot-noscript{display:block}
     <h4>八、快捷菜单</h4>
     <p>在页面任意处<em>右键</em>即可唤出快捷菜单，随时开关背景音乐、音效与全部视觉特效、开新游戏，或把当前这一局重新开始。菜单里的圆点亮着表示该项此刻是开着的。</p>
     <p>「全部特效」指落子涟漪、升变灵体、发芽、伤害飘字与震屏、淘汰碎片、棋盘 3D 倾斜这些演出；<em>残影标记、ASCEND 虚线与金光预警属于提示</em>，由设置里的「残影与提示」单独控制，两者互不影响。</p>
+    <h4>九、远程联机</h4>
+    <p>点顶部<em>「联机」</em>进入大厅，三种方式都能开一局：<em>快速匹配</em>由服务器把设置相同的两个人凑到一桌；<em>创建房间</em>会挂到公开房间列表里等人加入；也可以在在线玩家列表里直接<em>挑战</em>某人。两人各执一方，规则与本地双人完全相同，先手由服务器随机决定，再来一局时会自动交换。</p>
+    <p>联机时<em>棋局由服务器统一结算</em>：你落子只是把格子报上去，连珠判定、抵消、植物生长与伤害全在服务端算完再推回来。所以两台机器不可能走出两盘棋，也不用担心有人改前端。代价是每手要多一个来回（同一地区通常几十毫秒）。</p>
+    <p>对局中掉线不会立刻判负：牌桌在服务端保留 <em>90 秒</em>，刷新页面或网络恢复后会自动接回原局，血量、植物、残影、储备与棋谱都还在。超过这个时间对局才会结束，<em>留下的一方判胜</em>并照常看到终局结算；对手中途主动退出也一样。此时点击任意处即可开一局新的本地对战。</p>
+    <p>联机服务器就是仓库里的 <em>server.js</em>：运行 <em>node server.js</em> 后访问它打印的地址即可。若页面不是由这台服务器发出的（本地文件、别的静态托管、内网另一台机器），在大厅里<em>手动填写服务器地址</em>也能连上去，写「主机:端口」就行，比如 <em>192.168.1.10:8080</em>；写了 <em>https</em> 就自动走 <em>wss</em>。地址会被记住，下次打开自动带出。</p>
+    <p>连上之后可以互看<em>延迟</em>：大厅的在线玩家列表里每人后面标着他到服务器的往返毫秒数，对局中顶部状态条则同时显示<em>你</em>和<em>对手</em>的延迟。延迟只做展示，不参与任何判定。</p>
     <button class="chip gold close" id="btn-close">明白了，开始对局</button>
+  </div>
+</div>
+
+<!-- 远程联机 · 大厅 -->
+<div class="modal" id="netmodal">
+  <div class="sheet net-sheet">
+    <div class="lobby-head">
+      <div>
+        <h2>联机大厅</h2>
+        <p class="net-lead">对局由服务器统一结算，两边看到的是同一盘棋。断线 90 秒内回来可以接着下。</p>
+      </div>
+      <div class="lobby-conn" id="lobby-conn" data-kind="idle">
+        <span class="net-dot" aria-hidden="true"></span>
+        <b id="lobby-state">未连接</b>
+        <span class="lobby-ping" id="lobby-ping"></span>
+      </div>
+    </div>
+
+    <div class="lobby-server">
+      <label for="in-server">服务器</label>
+      <input id="in-server" class="lobby-addr" autocomplete="off" spellcheck="false"
+             placeholder="例如 192.168.1.10:8080 或 wss://game.example.com/ws">
+      <button class="chip" id="btn-connect" type="button">连接</button>
+    </div>
+
+    <div class="lobby-me">
+      <label for="in-name">昵称</label>
+      <input id="in-name" class="lobby-name" maxlength="12" autocomplete="off" spellcheck="false">
+      <button class="chip" id="btn-name" type="button">改</button>
+    </div>
+
+    <div class="lobby-quick">
+      <div class="lobby-quick-txt">
+        <b>快速匹配</b>
+        <p class="tip" id="quick-desc"></p>
+      </div>
+      <button class="chip gold" id="btn-quick" type="button">开始匹配</button>
+    </div>
+
+    <div class="lobby-invite" id="lobby-invite" hidden>
+      <span id="invite-txt"></span>
+      <span class="lobby-invite-btns">
+        <button class="chip gold" id="btn-invite-yes" type="button">接受</button>
+        <button class="chip" id="btn-invite-no" type="button">拒绝</button>
+      </span>
+    </div>
+
+    <div class="lobby-cols">
+      <section class="lobby-col">
+        <h3>在线玩家 <span id="player-count">0</span></h3>
+        <ul class="lobby-list" id="player-list"></ul>
+      </section>
+      <section class="lobby-col">
+        <div class="lobby-col-head">
+          <h3>公开房间 <span id="table-count">0</span></h3>
+          <button class="chip" id="btn-create-room" type="button">创建房间</button>
+        </div>
+        <ul class="lobby-list" id="table-list"></ul>
+      </section>
+    </div>
+
+    <p class="lobby-hint" id="lobby-hint"></p>
+
+    <div class="net-foot">
+      <button class="chip" id="btn-net-close" type="button">关闭</button>
+      <button class="chip danger" id="btn-net-leave" type="button" hidden>离开对局</button>
+    </div>
   </div>
 </div>
 
@@ -341,7 +421,7 @@ noscript .boot-noscript{display:block}
 </div>
 
 <!-- ================= 模块加载器 =================
- * 8 个经典脚本共享全局词法作用域、顺序敏感，这里按序逐个加载：
+ * 9 个经典脚本共享全局词法作用域、顺序敏感，这里按序逐个加载：
  * 前一个完整就绪（下载成功 + 全局符号校验通过）才加载下一个，
  * 全部就绪后移除遮罩、放行对局；任一步失败立即中断并给出原因。
  * 之所以不用普通同步 <script>：那种写法在网络慢时白屏无反馈，
@@ -359,7 +439,8 @@ noscript .boot-noscript{display:block}
     ["js/05-play.js",  ["maybeAI", "initAiMode"]],
     ["js/06-ui.js",    ["renderAll", "toast"]],
     ["js/07-app.js",   ["newGame", "restartGame"]],
-    ["js/08-tilt.js",  []]
+    ["js/08-tilt.js",  []],
+    ["js/09-net.js",   ["netConnect", "netDefaultAddr"]]
   ];
   var TIMEOUT = 15000; /* 单个模块的加载超时（毫秒） */
 
