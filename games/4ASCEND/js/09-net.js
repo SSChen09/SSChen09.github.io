@@ -268,6 +268,15 @@ function netConnect(force){
     return;
   }
 
+  /* https 页面里的 ws:// 属于混合内容，浏览器会直接拦掉；
+   * 报出来的错和「服务器没起来」长得一模一样，所以在这里就说清楚，
+   * 别让人去查端口和防火墙 */
+  if(location.protocol==='https:'&&/^ws:\/\//.test(NET.addr)){
+    netState('HTTPS 页面不能连明文 ws','err');
+    netHint('这个页面是 https 打开的，浏览器只允许 wss://。把地址换成域名（服务器配好证书或走 Cloudflare 代理）再连，例如 game.example.com。',true);
+    return;
+  }
+
   NET.connecting=true;
   netState('正在连接 '+netAddrLabel(NET.addr)+'…','busy');
 
@@ -316,8 +325,13 @@ function netScheduleReconnect(){
    * 这种错重试再多次也不会自己好，试几轮就停下，把选择权交回给人 */
   if(!NET.everOpened&&NET.attempts>=NET_RETRY_LIMIT){
     netState('连不上 '+netAddrLabel(NET.addr),'err');
+    /* https 页面 → 只能是 wss；服务端若只说明文 ws，在这边看起来就是「连不上」。
+     * 这条原因最容易被忽略，直接写进提示里 */
+    const tls=location.protocol==='https:'
+      ?' 另外：这个页面是 https 打开的，服务器必须支持 wss://（明文 ws 会被浏览器拦下）。'
+      :'';
     netHint('试了 '+NET_RETRY_LIMIT+' 次都连不上 '+netAddrLabel(NET.addr)+
-      '。检查地址与端口、服务器是否已启动，改完点「连接」重试。',true);
+      '。检查地址与端口、服务器是否已启动，改完点「连接」重试。'+tls,true);
     netSyncUI();
     return;
   }
@@ -827,6 +841,15 @@ function netOpen(){
   syncNameUI();
   netSyncUI();
   renderLobby();
+  /* https 页面只允许 wss：如果地址还是「IP:端口」这种明文写法，
+   * 进大厅就把规则摆出来，别让人等六轮重试（约一分钟）才知道原因 */
+  if(location.protocol==='https:'&&!NET.connected&&!NET.active){
+    let host='';
+    try{host=NET.addr?new URL(NET.addr).hostname:'';}catch(e){}
+    if(!host||/^[\d.]+$/.test(host)||/^\[/.test(host)){
+      netHint('本页是 https，联机地址要填支持 wss:// 的域名（例如 game.example.com）；直接填 IP:端口 会因服务器没有证书而连不上。');
+    }
+  }
   netConnect();
 }
 
