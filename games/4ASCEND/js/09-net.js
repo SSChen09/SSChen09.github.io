@@ -56,12 +56,18 @@ function netDom(tag,cls,text){
   return n;
 }
 
-function netState(title,kind){
+/* 状态徽章只放短标签（两到四个字），完整句子进 title 和下面的提示行。
+ * 之前这里直接塞整句（「正在连接 xxx…」），文字一长就被挤到标题下面另起一行，
+ * 重连时句子一长一短，弹窗在两行之间来回跳——所以文案和版式一起收短。 */
+function netState(label,kind,detail){
   const box=netEl('lobby-state');
   if(!box)return;
-  box.textContent=title;
-  const dot=netEl('lobby-conn');
-  if(dot)dot.dataset.kind=kind||'idle';
+  box.textContent=label;
+  const pill=netEl('lobby-conn');
+  if(pill){
+    pill.dataset.kind=kind||'idle';
+    pill.title=detail||label;
+  }
 }
 
 function netBar(){
@@ -263,7 +269,7 @@ function netConnect(force){
    * 直接双击打开 html（file://）时页面自己没有服务器，必须手填。 */
   if(!NET.addr)NET.addr=netParseAddr(netDefaultAddr())||'';
   if(!NET.addr){
-    netState('未填写服务器','err');
+    netState('未填写','err','没有服务器地址');
     netHint('这台页面不是由联机服务器发出来的，请在上面填服务器地址（例如 192.168.1.10:8080）。',true);
     return;
   }
@@ -272,13 +278,14 @@ function netConnect(force){
    * 报出来的错和「服务器没起来」长得一模一样，所以在这里就说清楚，
    * 别让人去查端口和防火墙 */
   if(location.protocol==='https:'&&/^ws:\/\//.test(NET.addr)){
-    netState('HTTPS 页面不能连明文 ws','err');
+    netState('需 wss','err','HTTPS 页面不能连明文 ws');
     netHint('这个页面是 https 打开的，浏览器只允许 wss://。把地址换成域名（服务器配好证书或走 Cloudflare 代理）再连，例如 game.example.com。',true);
     return;
   }
 
   NET.connecting=true;
-  netState('正在连接 '+netAddrLabel(NET.addr)+'…','busy');
+  netState('连接中','busy','正在连接 '+netAddrLabel(NET.addr)+'…');
+  netHint('正在连接 '+netAddrLabel(NET.addr)+'…');
 
   let ws;
   try{ws=new WebSocket(NET.addr);}
@@ -324,22 +331,30 @@ function netScheduleReconnect(){
   /* 一次都没握手成功，多半是地址/端口写错、防火墙没放行、服务没起来。
    * 这种错重试再多次也不会自己好，试几轮就停下，把选择权交回给人 */
   if(!NET.everOpened&&NET.attempts>=NET_RETRY_LIMIT){
-    netState('连不上 '+netAddrLabel(NET.addr),'err');
+    netState('连不上','err','连不上 '+netAddrLabel(NET.addr));
     /* https 页面 → 只能是 wss；服务端若只说明文 ws，在这边看起来就是「连不上」。
      * 这条原因最容易被忽略，直接写进提示里 */
     const tls=location.protocol==='https:'
-      ?' 另外：这个页面是 https 打开的，服务器必须支持 wss://（明文 ws 会被浏览器拦下）。'
+      ?'另外：这个页面是 https，服务器必须支持 wss://（明文 ws 会被浏览器拦下）。'
       :'';
     netHint('试了 '+NET_RETRY_LIMIT+' 次都连不上 '+netAddrLabel(NET.addr)+
-      '。检查地址与端口、服务器是否已启动，改完点「连接」重试。'+tls,true);
+      '。检查端口、服务是否已启动，改完点「连接」重试。'+tls,true);
     netSyncUI();
     return;
   }
 
   NET.attempts++;
   const delay=Math.min(NET_RETRY_MAX,500*Math.pow(2,NET.attempts-1));
-  netState(NET.everOpened?'连接断开，'+Math.round(delay/1000)+' 秒后重连…'
-                        :'连不上，'+Math.round(delay/1000)+' 秒后重试…','err');
+  const sec=Math.round(delay/1000);
+  /* 徽章只换标签，倒计时这类会变的字放提示行——两处都不改弹窗高度 */
+  if(NET.everOpened){
+    netState('重连中','err','连接断开，'+sec+' 秒后重连…');
+    netHint('连接断开，'+sec+' 秒后重连…（第 '+NET.attempts+' 次）');
+  }else{
+    netState('重试中','err','连不上，'+sec+' 秒后重试…');
+    netHint('连不上 '+netAddrLabel(NET.addr)+'，'+sec+' 秒后重试…（第 '+
+      NET.attempts+'/'+NET_RETRY_LIMIT+' 次）');
+  }
   NET.retryTimer=setTimeout(()=>{
     NET.retryTimer=null;
     netConnect();
@@ -842,12 +857,15 @@ function netOpen(){
   netSyncUI();
   renderLobby();
   /* https 页面只允许 wss：如果地址还是「IP:端口」这种明文写法，
-   * 进大厅就把规则摆出来，别让人等六轮重试（约一分钟）才知道原因 */
+   * 进大厅就把规则摆出来，别让人等六轮重试（约一分钟）才知道原因。
+   * 这里直接不发起连接——IP 字面量不可能有证书，连也是白连六次 */
   if(location.protocol==='https:'&&!NET.connected&&!NET.active){
     let host='';
     try{host=NET.addr?new URL(NET.addr).hostname:'';}catch(e){}
     if(!host||/^[\d.]+$/.test(host)||/^\[/.test(host)){
-      netHint('本页是 https，联机地址要填支持 wss:// 的域名（例如 game.example.com）；直接填 IP:端口 会因服务器没有证书而连不上。');
+      netState(host?'需 wss':'未连接',host?'err':'idle','https 页面只能连 wss，地址要填域名');
+      netHint('本页是 https，联机地址要填支持 wss:// 的域名（例如 game.example.com）；直接填 IP:端口 会因服务器没有证书而连不上。',true);
+      return;
     }
   }
   netConnect();

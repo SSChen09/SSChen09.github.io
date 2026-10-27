@@ -685,12 +685,18 @@ button,.chip,.seg-btn,.rp-btn{-webkit-tap-highlight-color:transparent;touch-acti
 .net-sheet{width:min(720px,100%)}
 .net-lead{font-size:11.5px;line-height:1.9;color:#9d94b8;margin:6px 0 0;letter-spacing:.04em}
 
-/* 顶部：标题 + 连接状态 */
-.lobby-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
-.lobby-conn{display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;
+/* 顶部：标题 + 连接状态。
+   徽章盒子定宽、不换行、内容靠左：状态文字长短差很多（「正在连接 xxx…」→「已连接」），
+   若让它自己撑宽，就会被 flex-wrap 挤到标题下面另起一行；重连时文字一长一短，
+   徽章在两行之间来回跳，弹窗高度也跟着涨落。所以标题块让位，徽章位置固定。 */
+.lobby-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:nowrap}
+.lobby-head>div:first-child{flex:1 1 auto;min-width:0}
+.lobby-conn{flex:0 0 auto;display:flex;align-items:center;justify-content:flex-start;gap:7px;
+  min-width:150px;padding:6px 12px;border-radius:999px;
   background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
   font-size:11px;letter-spacing:.08em;color:var(--muted);white-space:nowrap}
-.lobby-conn b{color:var(--ink);font-weight:600}
+/* 标签留出四字宽度，ping 出现时只往右长，不推着标签左右挪 */
+.lobby-conn b{color:var(--ink);font-weight:600;display:inline-block;min-width:4.2em}
 .lobby-conn[data-kind="ok"]{border-color:rgba(95,227,154,.4);background:rgba(95,227,154,.08)}
 .lobby-conn[data-kind="busy"] .net-dot{background:var(--gold);box-shadow:0 0 9px var(--gold);animation:netPulse 1.2s ease-in-out infinite}
 .lobby-conn[data-kind="err"]{border-color:rgba(255,107,125,.45);background:rgba(255,107,125,.08)}
@@ -719,6 +725,9 @@ button,.chip,.seg-btn,.rp-btn{-webkit-tap-highlight-color:transparent;touch-acti
 .lobby-addr:focus{border-color:rgba(232,182,76,.7);background:rgba(232,182,76,.07)}
 .lobby-addr:disabled{opacity:.55}
 .lobby-server .chip:disabled{opacity:.45;cursor:not-allowed}
+/* 「连接」/「连接中…」/「重连」三种字数不同，给个下限，
+   否则按钮一涨一缩，旁边的地址框跟着左右抽 */
+.lobby-server .chip{min-width:84px}
 
 /* 玩家行里的延迟：只有测到了才占位，没测到就整块消失 */
 .lb-lat{flex:0 0 auto;font-size:10px;letter-spacing:.04em;padding:2px 6px;border-radius:6px;
@@ -770,8 +779,12 @@ button,.chip,.seg-btn,.rp-btn{-webkit-tap-highlight-color:transparent;touch-acti
 .lb-empty{padding:16px 12px;font-size:11.5px;line-height:1.8;color:#7d7499;text-align:center}
 .chip.tiny{padding:4px 10px;font-size:11px;letter-spacing:.06em}
 
-.lobby-hint{margin:12px 0 0;font-size:11px;line-height:1.8;letter-spacing:.05em;color:#8f86ad;min-height:1.2em}
-.lobby-hint:empty{display:none}
+/* 提示行固定两行高：连不上时这里会出现整段说明，平时是空的。
+   若让它随内容伸缩（空着就 display:none），弹窗高度就跟着一涨一落。
+   用 .net-sheet 提权，是为了盖过 .sheet p 的 13px/2 行高——否则按 13px 算，
+   预留的高度只够一行半，长提示会被裁掉。最长的报错在桌面宽度下正好两行。 */
+.net-sheet .lobby-hint{margin:12px 0 0;font-size:11.5px;line-height:1.9;letter-spacing:.05em;
+  color:#8f86ad;min-height:4em;max-height:4em;overflow:auto;overscroll-behavior:contain}
 .lobby-hint.bad{color:#ffc6cd}
 
 .net-foot{display:flex;gap:8px;margin-top:16px}
@@ -786,4 +799,17 @@ button,.chip,.seg-btn,.rp-btn{-webkit-tap-highlight-color:transparent;touch-acti
   .lobby-quick .chip{width:100%}
   .net-foot{flex-direction:column}
   .net-foot .chip{width:100%}
+}
+
+/* 窄屏放不下标题 + 徽章并排：允许换行。徽章宽度现在由标签固定，
+   换行也只会在同一处发生，不会来回跳 */
+@media(max-width:520px){
+  .lobby-head{flex-wrap:wrap}
+  .lobby-conn{min-width:0}
+}
+
+/* 窄屏一行字少，同一段提示会折成三行：提示区跟着加高，
+   同样是定高，不随内容变化 */
+@media(max-width:640px){
+  .net-sheet .lobby-hint{min-height:6em;max-height:6em}
 }
