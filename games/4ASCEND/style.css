@@ -334,6 +334,10 @@ select{background:rgba(255,255,255,.07);color:#efe6ff;border:1px solid rgba(232,
 .dmg{position:absolute;transform:translate(-50%,-50%);font-weight:800;font-size:clamp(24px,5.6vw,42px);
   letter-spacing:.03em;color:#ff9aa4;text-shadow:0 6px 26px rgba(0,0,0,.75),0 0 22px rgba(255,72,92,.6);
   animation:dmgFloat 1.15s cubic-bezier(.2,.8,.2,1) forwards;white-space:nowrap}
+/* 联机：自己掉血用红、对手掉血用冷色，配合「你 / 对手」两个词，
+   换边之后也不用去数面板。颜色只是辅助，文案本身就说得清 */
+.dmg.mine{color:#ff9aa4}
+.dmg.foe{color:#a8c8ff;text-shadow:0 6px 26px rgba(0,0,0,.75),0 0 22px rgba(96,150,255,.5)}
 
 /* ---------- 淘汰：败者面板炸成碎片 ---------- */
 /* 冻结快照层：每一片都是一块被裁切出来的面板副本，所以碎片上带着真实内容 */

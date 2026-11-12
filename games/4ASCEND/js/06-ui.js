@@ -50,15 +50,25 @@ function animateSprout(i){
   floats.appendChild(el);
   setTimeout(()=>el.remove(),900);
 }
-/* 伤害反馈三件套：飘字 + 震屏 + 红色晕影，一并在特效开关里 */
+/* 伤害反馈三件套：飘字 + 震屏 + 红色晕影，一并在特效开关里。
+ *
+ * 联机时「谁掉血」在两台机器上是相反的，所以两处都得按「我」来说：
+ *  - 飘字写「你 / 对手」而不是阵营名。阵营名两台机器看到的是同一个词
+ *    （都写「魔族」），先手交换之后玩家很容易读成「怎么又是我掉血」。
+ *  - 震屏与红晕只在自己这一侧挨打时出现。对手掉血却让自己的屏幕抖一下、
+ *    再压一层红色晕影，看起来完全就是「判定打反了」。
+ * 本地 / 人机是同一块屏幕给两个人看，维持阵营名与原样震动。 */
 function animateDamage(amount,victim){
   if(!fxOn)return;
+  const remote=mode==='net'&&typeof NET!=='undefined'&&NET.active;
+  const mine=!remote||victim===NET.mySide;
   const el=document.createElement('div');
-  el.className='dmg';
-  el.textContent=NAMES[victim].slice(0,2)+'  -'+amount;
+  el.className='dmg'+(remote?(mine?' mine':' foe'):'');
+  el.textContent=(remote?(mine?'你':'对手'):NAMES[victim].slice(0,2))+'  -'+amount;
   el.style.left='50%';el.style.top='44%';
   floats.appendChild(el);
   setTimeout(()=>el.remove(),1200);
+  if(!mine)return;                      // 对手掉血不震自己的屏
   document.body.classList.add('hit');
   setTimeout(()=>document.body.classList.remove('hit'),520);
 }

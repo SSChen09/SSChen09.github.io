@@ -1,0 +1,31 @@
+{
+	"Version": 3,
+	"FileReferences": {
+		"Moc": "SHIRONEKO.moc3",
+		"Textures": [
+			"SHIRONEKO.2048/texture_00.png",
+			"SHIRONEKO.2048/texture_01.png",
+			"SHIRONEKO.2048/texture_02.png",
+			"SHIRONEKO.2048/texture_03.png",
+			"SHIRONEKO.2048/texture_04.png",
+			"SHIRONEKO.2048/texture_05.png",
+			"SHIRONEKO.2048/texture_06.png"
+		],
+		"Physics": "SHIRONEKO.physics3.json"
+	},
+	"Groups": [
+		{
+			"Target": "Parameter",
+			"Name": "EyeBlink",
+			"Ids": [
+				"ParamEyeLOpen",
+				"ParamEyeROpen"
+			]
+		},
+		{
+			"Target": "Parameter",
+			"Name": "LipSync",
+			"Ids": []
+		}
+	]
+}
