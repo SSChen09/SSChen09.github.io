@@ -808,16 +808,76 @@ const defaultFollowTheme = true;
         loadTrack: loadTrack
     };
 })();
-})();</script><main class="dynamic-comment-embed"><div id="post-comments" class="card-base p-8 mb-6 relative overflow-hidden"><!-- 评论区装饰性背景 --><div class="absolute top-0 right-0 w-32 h-32 opacity-5 pointer-events-none"><svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="40" fill="currentColor" class="text-(--primary)"></circle><circle cx="50" cy="50" r="25" fill="none" stroke="currentColor" stroke-width="2" class="text-(--primary)"></circle><circle cx="50" cy="50" r="10" fill="currentColor" class="text-(--primary)"></circle></svg></div><!-- 评论区标题 --><div class="relative z-10 mb-6"><div class="flex items-center gap-3 mb-2"><div class="w-1 h-6 bg-linear-to-b from-(--primary) to-transparent rounded-full"></div><h3 class="text-xl font-bold text-(--btn-content)">评论区</h3></div><p class="text-sm text-(--content-meta) ml-4">分享你的想法，与大家交流讨论</p></div><!-- 评论内容区域 --><div class="relative z-10 pl-2 pr-2"><!-- Waline --><div class="relative w-full"><div id="waline"></div><link rel="stylesheet" href="https://unpkg.com/@waline/client@v3/dist/waline.css"><script type="module">const config = {"serverURL":"https://waline.sslc0721.xyz/","lang":"zh-CN","emoji":["https://unpkg.com/@waline/emojis@1.4.0/weibo","https://unpkg.com/@waline/emojis@1.4.0/bilibili","https://unpkg.com/@waline/emojis@1.4.0/bmoji"],"login":"disable","visitorCount":true,"el":"#waline","path":"/dynamic/","dark":"html.dark","wordLimit":["2","300"],"pageview":true};
+})();</script><main class="dynamic-comment-embed"><div id="post-comments" class="card-base p-8 mb-6 relative overflow-hidden"><!-- 评论区装饰性背景 --><div class="absolute top-0 right-0 w-32 h-32 opacity-5 pointer-events-none"><svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="40" fill="currentColor" class="text-(--primary)"></circle><circle cx="50" cy="50" r="25" fill="none" stroke="currentColor" stroke-width="2" class="text-(--primary)"></circle><circle cx="50" cy="50" r="10" fill="currentColor" class="text-(--primary)"></circle></svg></div><!-- 评论区标题 --><div class="relative z-10 mb-6"><div class="flex items-center gap-3 mb-2"><div class="w-1 h-6 bg-linear-to-b from-(--primary) to-transparent rounded-full"></div><h3 class="text-xl font-bold text-(--btn-content)">评论区</h3></div><p class="text-sm text-(--content-meta) ml-4">分享你的想法，与大家交流讨论</p></div><!-- 评论内容区域 --><div class="relative z-10 pl-2 pr-2"><div id="tcomment"></div><script src="https://registry.npmmirror.com/twikoo/2.0.17/files/dist/twikoo.min.js"></script><link rel="stylesheet" href="/assets/css/twikoo-custom.css"><script>(function(){const config = {"envId":"https://twikoo.sslc0721.xyz","lang":"zh-CN","visitorCount":true,"jsUrl":"https://registry.npmmirror.com/twikoo/2.0.17/files/dist/twikoo.min.js","cssUrl":"/assets/css/twikoo-custom.css","el":"#tcomment","path":"/dynamic/"};
 
-    import { init } from 'https://unpkg.com/@waline/client@v3/dist/waline.js';
+  // 获取当前页面路径
+  function getCurrentPath() {
     const requestedPath = new URLSearchParams(window.location.search).get("path");
-    const effectiveConfig = requestedPath
-      ? { ...config, path: requestedPath }
-      : config;
-    try {
-      init(effectiveConfig);
-    } catch (error) {
-      console.error("[Waline] Failed to initialize:", error);
+    if (requestedPath) return requestedPath;
+    const pathname = window.location.pathname;
+    return pathname.endsWith("/") && pathname.length > 1
+      ? pathname.slice(0, -1)
+      : pathname;
+  }
+
+  // 动态创建配置对象
+  function createTwikooConfig() {
+    return {
+      ...config,
+      path: getCurrentPath(),
+      el: "#tcomment",
+    };
+  }
+
+  // 初始化 Twikoo
+  function initTwikoo() {
+    if (typeof twikoo !== "undefined") {
+      const commentEl = document.getElementById("tcomment");
+      if (commentEl) {
+        commentEl.innerHTML = "";
+
+        const dynamicConfig = createTwikooConfig();
+        console.log("[Twikoo] 初始化配置:", dynamicConfig);
+
+        twikoo
+          .init(dynamicConfig)
+          .then(() => {
+            console.log("[Twikoo] 初始化完成");
+          })
+          .catch((error) => {
+            console.error("[Twikoo] 初始化失败:", error);
+          });
+      }
+    } else {
+      // 如果 Twikoo 未加载，稍后重试
+      setTimeout(initTwikoo, 500);
     }
-  </script></div></div></div></main><!-- Sakura Effect --><script type="module" src="/_astro/SakuraEffect.astro_astro_type_script_index_0_lang.iciR62si.js"></script><!-- Fancybox Manager --><script type="module" src="/_astro/FancyboxManager.astro_astro_type_script_index_0_lang.CNTJf_X7.js"></script></body></html><script type="module" src="/_astro/Layout.astro_astro_type_script_index_0_lang.BUoGL-4g.js"></script><script type="module">window.addEventListener("message",e=>{e.origin!==window.location.origin||e.data?.type!=="dynamic-comment-theme"||(document.documentElement.classList.toggle("dark",!!e.data.dark),document.documentElement.dataset.theme=e.data.dark?"dark":"light")});var t=()=>{window.parent.postMessage({type:"dynamic-comment-height",height:document.documentElement.scrollHeight},window.location.origin)};new ResizeObserver(t).observe(document.body);window.addEventListener("load",t);</script>
+  }
+
+  // 页面加载时初始化
+  document.addEventListener("DOMContentLoaded", initTwikoo);
+
+  // Swup 页面切换后重新初始化
+  if (window.swup && window.swup.hooks) {
+    window.swup.hooks.on("content:replace", function () {
+      setTimeout(initTwikoo, 200);
+    });
+  } else {
+    document.addEventListener("swup:enable", function () {
+      if (window.swup && window.swup.hooks) {
+        window.swup.hooks.on("content:replace", function () {
+          setTimeout(initTwikoo, 200);
+        });
+      }
+    });
+  }
+
+  // 自定义事件监听
+  document.addEventListener("firefly:page:loaded", function () {
+    const commentEl = document.getElementById("tcomment");
+    if (commentEl) {
+      console.log("[Twikoo] 通过自定义事件重新初始化");
+      initTwikoo();
+    }
+  });
+})();</script></div></div></main><!-- Sakura Effect --><script type="module" src="/_astro/SakuraEffect.astro_astro_type_script_index_0_lang.iciR62si.js"></script><!-- Fancybox Manager --><script type="module" src="/_astro/FancyboxManager.astro_astro_type_script_index_0_lang.CNTJf_X7.js"></script></body></html><script type="module" src="/_astro/Layout.astro_astro_type_script_index_0_lang.BUoGL-4g.js"></script><script type="module">window.addEventListener("message",e=>{e.origin!==window.location.origin||e.data?.type!=="dynamic-comment-theme"||(document.documentElement.classList.toggle("dark",!!e.data.dark),document.documentElement.dataset.theme=e.data.dark?"dark":"light")});var t=()=>{window.parent.postMessage({type:"dynamic-comment-height",height:document.documentElement.scrollHeight},window.location.origin)};new ResizeObserver(t).observe(document.body);window.addEventListener("load",t);</script>
