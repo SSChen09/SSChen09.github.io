@@ -355,7 +355,7 @@ const cardTransparentOpacity = 0.5;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
     }
   </style><script type="module">document.fonts&&typeof document.fonts.ready<"u"&&document.fonts.ready.then(()=>{document.dispatchEvent(new CustomEvent("fontsLoaded"))}).catch(n=>{console.warn("Font loading failed:",n)});</script><style>html:has(.dynamic-comment-embed),body:has(.dynamic-comment-embed){overflow:hidden;background:transparent!important}.dynamic-comment-embed #post-comments{margin:0;border:0;box-shadow:none}
-</style><link rel="stylesheet" href="/_astro/Layout.RIqJkXCu.css"><script type="module" src="/_astro/page.L0U7MNaK.js"></script></head><body class="min-h-screen enable-banner sticky-navbar" style="--configHue: 250;--page-width: 100rem;--banner-height-home: 65vh;--banner-height: 35vh;" data-astro-cid-ju4pidww><div id="progress-bar" style="--configHue: 250;--page-width: 100rem;--banner-height-home: 65vh;--banner-height: 35vh;" data-astro-cid-ju4pidww></div><script>(function(){const defaultBorder = true;
+</style><link rel="stylesheet" href="/_astro/Layout.DET5cvLI.css"><script type="module" src="/_astro/page.L0U7MNaK.js"></script></head><body class="min-h-screen enable-banner sticky-navbar" style="--configHue: 250;--page-width: 100rem;--banner-height-home: 65vh;--banner-height: 35vh;" data-astro-cid-ju4pidww><div id="progress-bar" style="--configHue: 250;--page-width: 100rem;--banner-height-home: 65vh;--banner-height: 35vh;" data-astro-cid-ju4pidww></div><script>(function(){const defaultBorder = true;
 const defaultFollowTheme = true;
 
       (function() {
@@ -715,38 +715,59 @@ const defaultFollowTheme = true;
         }
     });
 
+    // 全局播放器开始播放时，通知文章 BGM（PostBgmBar）暂停，避免两路声音同时播放
+    audio.addEventListener('play', function () {
+        window.dispatchEvent(new CustomEvent('postbgm:pause'));
+    });
+
     // ── Init (idempotent) ────────────────────────────────────
-    async function init() {
-        if (state.initialized || state.initializing) return;
-        state.initializing = true;
+    // 返回共享 Promise：多个播放器组件挂载时可能并发调用，需等待同一次初始化
+    var initPromise = null;
+    function init() {
+        if (state.initialized) return Promise.resolve();
+        if (initPromise) return initPromise;
 
-        try {
-            if (config.mode === 'meting' && config.meting) {
-                await fetchMetingData();
-            } else if (config.mode === 'local') {
-                state.playlist = config.localPlaylist || [];
-            }
+        initPromise = (async function () {
+            state.initializing = true;
 
-            if (state.playlist.length > 0) {
-                // Apply volume
-                audio.volume = state.volume;
-
-                var startIndex = 0;
-                if (state.playMode === 2) {
-                    startIndex = Math.floor(Math.random() * state.playlist.length);
+            try {
+                if (config.mode === 'meting' && config.meting) {
+                    await fetchMetingData();
+                } else if (config.mode === 'local') {
+                    state.playlist = config.localPlaylist || [];
                 }
 
-                state.initialized = true;
+                if (state.playlist.length > 0) {
+                    // Apply volume
+                    audio.volume = state.volume;
 
-                emit('fm:init', {
-                    playlist: state.playlist,
-                    playMode: state.playMode,
-                    volume: state.volume,
-                    isMuted: state.isMuted
-                });
+                    var startIndex = 0;
+                    if (state.playMode === 2) {
+                        startIndex = Math.floor(Math.random() * state.playlist.length);
+                    }
 
-                loadTrack(startIndex, false);
-            } else {
+                    state.initialized = true;
+
+                    emit('fm:init', {
+                        playlist: state.playlist,
+                        playMode: state.playMode,
+                        volume: state.volume,
+                        isMuted: state.isMuted
+                    });
+
+                    loadTrack(startIndex, false);
+                } else {
+                    state.initialized = true;
+                    emit('fm:init', {
+                        playlist: [],
+                        playMode: state.playMode,
+                        volume: state.volume,
+                        isMuted: state.isMuted
+                    });
+                    emit('fm:error', { message: config.i18n.noSongs });
+                }
+            } catch (e) {
+                console.error('Music Manager init error:', e);
                 state.initialized = true;
                 emit('fm:init', {
                     playlist: [],
@@ -754,22 +775,25 @@ const defaultFollowTheme = true;
                     volume: state.volume,
                     isMuted: state.isMuted
                 });
-                emit('fm:error', { message: config.i18n.noSongs });
+                emit('fm:error', { message: config.i18n.error });
+            } finally {
+                state.initializing = false;
             }
-        } catch (e) {
-            console.error('Music Manager init error:', e);
-            state.initialized = true;
-            emit('fm:init', {
-                playlist: [],
-                playMode: state.playMode,
-                volume: state.volume,
-                isMuted: state.isMuted
-            });
-            emit('fm:error', { message: config.i18n.error });
-        } finally {
-            state.initializing = false;
-        }
+        })();
+
+        return initPromise;
     }
+
+    // ── 与文章 BGM 的互斥 ────────────────────────────────────
+    // 文章 BGM 由文章页的 PostBgmBar 用独立的 audio 元素播放，不占用这里的歌单。
+    // 它开始播放时会派发 postbgm:play：这里暂停全局播放（保留歌单与进度）；
+    // 反过来，全局播放器开始播放时通过 audio 'play' 事件派发 postbgm:pause 让它暂停。
+    window.addEventListener('postbgm:play', function () {
+        if (audio.paused) return;
+        audio.pause();
+        state.isPlaying = false;
+        emit('fm:play-state', { isPlaying: false });
+    });
 
     // ── Public API ───────────────────────────────────────────
     window.__fireflyMusic = {
@@ -880,4 +904,4 @@ const defaultFollowTheme = true;
       initTwikoo();
     }
   });
-})();</script></div></div></main><!-- Sakura Effect --><script type="module" src="/_astro/SakuraEffect.astro_astro_type_script_index_0_lang.iciR62si.js"></script><!-- Fancybox Manager --><script type="module" src="/_astro/FancyboxManager.astro_astro_type_script_index_0_lang.CNTJf_X7.js"></script></body></html><script type="module" src="/_astro/Layout.astro_astro_type_script_index_0_lang.BUoGL-4g.js"></script><script type="module">window.addEventListener("message",e=>{e.origin!==window.location.origin||e.data?.type!=="dynamic-comment-theme"||(document.documentElement.classList.toggle("dark",!!e.data.dark),document.documentElement.dataset.theme=e.data.dark?"dark":"light")});var t=()=>{window.parent.postMessage({type:"dynamic-comment-height",height:document.documentElement.scrollHeight},window.location.origin)};new ResizeObserver(t).observe(document.body);window.addEventListener("load",t);</script>
+})();</script></div></div></main><!-- Sakura Effect --><script type="module" src="/_astro/SakuraEffect.astro_astro_type_script_index_0_lang.iciR62si.js"></script><!-- Fancybox Manager --><script type="module" src="/_astro/FancyboxManager.astro_astro_type_script_index_0_lang.CNTJf_X7.js"></script></body></html><script type="module" src="/_astro/Layout.astro_astro_type_script_index_0_lang.eW6Ay2xw.js"></script><script type="module">window.addEventListener("message",e=>{e.origin!==window.location.origin||e.data?.type!=="dynamic-comment-theme"||(document.documentElement.classList.toggle("dark",!!e.data.dark),document.documentElement.dataset.theme=e.data.dark?"dark":"light")});var t=()=>{window.parent.postMessage({type:"dynamic-comment-height",height:document.documentElement.scrollHeight},window.location.origin)};new ResizeObserver(t).observe(document.body);window.addEventListener("load",t);</script>
